@@ -392,10 +392,10 @@ function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-navy text-navy-foreground">
-            <span className="font-display text-base font-semibold">e</span>
+            <span className="font-display text-base font-semibold">a</span>
           </div>
-          <span className="font-display text-lg font-medium">
-            Estate<span className="text-green">.</span>Karachi
+          <span className="font-display text-lg font-medium tracking-tight">
+            abaad<span className="text-green">.</span>com
           </span>
         </a>
         <nav className="hidden items-center gap-7 text-sm md:flex">
