@@ -32,8 +32,8 @@
   --color-navy-foreground: var(--navy-foreground);
   --color-green: var(--green);
   --color-green-foreground: var(--green-foreground);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-sans: "Geist", system-ui, sans-serif;
 }
 
 :root {
@@ -89,5 +89,5 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.025em; font-weight: 500; }
 }

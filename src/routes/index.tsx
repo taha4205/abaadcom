@@ -17,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Estate Karachi — Find your next property" },
+      { title: "abaad.com — Find your next property in Karachi" },
       { name: "description", content: "Karachi's curated marketplace for buying, renting, and listing properties. Browse flats, plots, and commercial spaces from verified realtors." },
-      { property: "og:title", content: "Estate Karachi" },
+      { property: "og:title", content: "abaad.com" },
       { property: "og:description", content: "Find your next property in Karachi." },
     ],
   }),
@@ -36,54 +36,62 @@ const KARACHI_AREAS = [
 type Intent = "buy" | "rent";
 type Category = "flat" | "house" | "commercial" | "plot";
 
+const UNSPLASH = (id: string) => `https://images.unsplash.com/${id}?w=900&q=80&auto=format&fit=crop`;
+
 const PROPERTIES = [
   {
     id: 1, title: "Modern 3-Bed Apartment with Sea View", area: "Clifton Block 2",
     price: "PKR 4.85 Cr", priceNum: 48500000, intent: "buy" as Intent, category: "flat" as Category,
     beds: 3, baths: 3, size: 2200, featured: true, realtor: "Skyline Realty",
-    hue: 215,
+    image: UNSPLASH("photo-1545324418-cc1a3fa10c00"),
   },
   {
     id: 2, title: "500 Sq Yd Corner Plot, Prime Location", area: "DHA Phase 8",
     price: "PKR 9.2 Cr", priceNum: 92000000, intent: "buy" as Intent, category: "plot" as Category,
     beds: 0, baths: 0, size: 500, featured: true, realtor: "Coastline Estates",
-    hue: 165,
+    image: UNSPLASH("photo-1500382017468-9049fed747ef"),
   },
   {
     id: 3, title: "Furnished 2-Bed Flat for Rent", area: "Bahadurabad",
     price: "PKR 145,000/mo", priceNum: 145000, intent: "rent" as Intent, category: "flat" as Category,
     beds: 2, baths: 2, size: 1400, featured: false, realtor: "Metro Homes",
-    hue: 230,
+    image: UNSPLASH("photo-1502672260266-1c1ef2d93688"),
   },
   {
     id: 4, title: "Commercial Ground Floor Shop", area: "Tariq Road",
     price: "PKR 380,000/mo", priceNum: 380000, intent: "rent" as Intent, category: "commercial" as Category,
     beds: 0, baths: 1, size: 900, featured: true, realtor: "Prime Commercial",
-    hue: 165,
+    image: UNSPLASH("photo-1604328698692-f76ea9498e76"),
   },
   {
     id: 5, title: "5-Bed Bungalow with Lawn & Servant Quarters", area: "DHA Phase 6",
     price: "PKR 18.5 Cr", priceNum: 185000000, intent: "buy" as Intent, category: "house" as Category,
     beds: 5, baths: 6, size: 4500, featured: false, realtor: "Coastline Estates",
-    hue: 220,
+    image: UNSPLASH("photo-1568605114967-8130f3a36994"),
   },
   {
     id: 6, title: "240 Sq Yd Residential Plot", area: "Bahria Town Karachi",
     price: "PKR 1.65 Cr", priceNum: 16500000, intent: "buy" as Intent, category: "plot" as Category,
     beds: 0, baths: 0, size: 240, featured: false, realtor: "Bahria Listings",
-    hue: 195,
+    image: UNSPLASH("photo-1486325212027-8081e485255e"),
   },
   {
     id: 7, title: "Studio Apartment, Brand New Building", area: "Gulshan-e-Iqbal",
     price: "PKR 65,000/mo", priceNum: 65000, intent: "rent" as Intent, category: "flat" as Category,
     beds: 1, baths: 1, size: 650, featured: false, realtor: "Metro Homes",
-    hue: 240,
+    image: UNSPLASH("photo-1522708323590-d24dbb6b0267"),
   },
   {
     id: 8, title: "1,000 Sq Ft Office on Sharah-e-Faisal", area: "Saddar",
     price: "PKR 2.4 Cr", priceNum: 24000000, intent: "buy" as Intent, category: "commercial" as Category,
     beds: 0, baths: 2, size: 1000, featured: false, realtor: "Prime Commercial",
-    hue: 165,
+    image: UNSPLASH("photo-1497366216548-37526070297c"),
+  },
+  {
+    id: 9, title: "Double-Storey Bungalow, Fully Renovated", area: "DHA Phase 5",
+    price: "PKR 12.75 Cr", priceNum: 127500000, intent: "buy" as Intent, category: "house" as Category,
+    beds: 4, baths: 5, size: 3200, featured: true, realtor: "Skyline Realty",
+    image: UNSPLASH("photo-1600596542815-ffad4c1539a9"),
   },
 ];
 
@@ -334,16 +342,14 @@ function Index() {
 function PropertyCard({ p }: { p: typeof PROPERTIES[number] }) {
   return (
     <article className="group overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div
-        className="relative aspect-[4/3] w-full"
-        style={{
-          background: `linear-gradient(135deg, oklch(0.45 0.08 ${p.hue}) 0%, oklch(0.28 0.06 ${p.hue + 20}) 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%)",
-          backgroundSize: "20px 20px",
-        }} />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
+        <img
+          src={p.image}
+          alt={p.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         {p.featured && (
           <Badge className="absolute left-3 top-3 border-0 bg-green text-green-foreground">
             <Star className="mr-1 h-3 w-3 fill-current" />
@@ -386,10 +392,10 @@ function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-navy text-navy-foreground">
-            <span className="font-display text-base font-semibold">e</span>
+            <span className="font-display text-base font-semibold">a</span>
           </div>
-          <span className="font-display text-lg font-medium">
-            Estate<span className="text-green">.</span>Karachi
+          <span className="font-display text-lg font-medium tracking-tight">
+            abaad<span className="text-green">.</span>com
           </span>
         </a>
         <nav className="hidden items-center gap-7 text-sm md:flex">
@@ -411,11 +417,11 @@ function Footer() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-10 md:flex-row md:items-center">
-        <p className="font-display text-base">
-          Estate<span className="text-green">.</span>Karachi
+        <p className="font-display text-base tracking-tight">
+          abaad<span className="text-green">.</span>com
         </p>
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Estate Karachi. A marketplace for verified realtors.
+          © {new Date().getFullYear()} abaad.com — A marketplace for verified realtors in Karachi.
         </p>
       </div>
     </footer>
