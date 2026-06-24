@@ -342,16 +342,14 @@ function Index() {
 function PropertyCard({ p }: { p: typeof PROPERTIES[number] }) {
   return (
     <article className="group overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div
-        className="relative aspect-[4/3] w-full"
-        style={{
-          background: `linear-gradient(135deg, oklch(0.45 0.08 ${p.hue}) 0%, oklch(0.28 0.06 ${p.hue + 20}) 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%)",
-          backgroundSize: "20px 20px",
-        }} />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
+        <img
+          src={p.image}
+          alt={p.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         {p.featured && (
           <Badge className="absolute left-3 top-3 border-0 bg-green text-green-foreground">
             <Star className="mr-1 h-3 w-3 fill-current" />
