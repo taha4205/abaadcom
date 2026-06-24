@@ -417,11 +417,11 @@ function Footer() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-10 md:flex-row md:items-center">
-        <p className="font-display text-base">
-          Estate<span className="text-green">.</span>Karachi
+        <p className="font-display text-base tracking-tight">
+          abaad<span className="text-green">.</span>com
         </p>
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Estate Karachi. A marketplace for verified realtors.
+          © {new Date().getFullYear()} abaad.com — A marketplace for verified realtors in Karachi.
         </p>
       </div>
     </footer>
