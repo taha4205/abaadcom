@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { generateText, Output } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
@@ -16,19 +16,28 @@ const InputSchema = z.object({
 });
 
 const OutputSchema = z.object({
-  polishedTitle: z.string().describe("A concise, compelling 6-12 word listing title."),
-  polishedDescription: z.string().describe("A 2-3 sentence buyer-friendly description, no emojis."),
-  fairMin: z.number().describe("Estimated fair market minimum in PKR for this property."),
-  fairMax: z.number().describe("Estimated fair market maximum in PKR for this property."),
-  verdict: z.enum(["under", "fair", "over"]).describe("Whether asking price is under, fairly, or over market."),
-  reasoning: z.string().describe("One short paragraph explaining the price assessment for Karachi market in 2026."),
+  polishedTitle: z.string(),
+  polishedDescription: z.string(),
+  fairMin: z.number(),
+  fairMax: z.number(),
+  verdict: z.enum(["under", "fair", "over"]),
+  reasoning: z.string(),
 });
 
 export type ListingAiResult = z.infer<typeof OutputSchema>;
 
+function extractJson(text: string): unknown {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = fenced ? fenced[1] : text;
+  const start = candidate.indexOf("{");
+  const end = candidate.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("No JSON in AI response");
+  return JSON.parse(candidate.slice(start, end + 1));
+}
+
 export const assistListing = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => InputSchema.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<ListingAiResult> => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
@@ -37,7 +46,8 @@ export const assistListing = createServerFn({ method: "POST" })
 
     const unit = data.category === "plot" ? "sq yd" : "sq ft";
     const intentLine = data.intent === "rent" ? "for monthly rent" : "for sale";
-    const prompt = `You are a Karachi real estate expert helping a realtor list a property on abaad.com.
+    const prompt = `You are a Karachi real estate expert helping a realtor list a property on abaad.com (2026).
+
 Property:
 - Location: ${data.area}, Karachi
 - Type: ${data.category} (${intentLine})
@@ -48,17 +58,22 @@ Property:
 - Realtor draft description: ${data.rawDescription || "(none)"}
 
 Tasks:
-1. Write a sharp listing title and description that a buyer would click.
-2. Estimate a fair market price range in PKR for this exact property in Karachi (2026), based on typical per-sq-ft/sq-yd rates for the area and type. Be realistic and specific.
-3. Compare the asking price to your range and give a verdict (under / fair / over) with reasoning.
+1. Write a sharp 6-12 word listing title.
+2. Write a 2-3 sentence buyer-friendly description (no emojis).
+3. Estimate a realistic fair market price range in PKR for this property in Karachi based on typical per-${unit} rates for the area and type.
+4. Verdict: "under" / "fair" / "over" comparing asking to your range, with one short paragraph of reasoning.
 
-Return ONLY the structured object.`;
+Respond ONLY with valid JSON matching this exact shape (no prose, no code fences):
+{
+  "polishedTitle": string,
+  "polishedDescription": string,
+  "fairMin": number (PKR),
+  "fairMax": number (PKR),
+  "verdict": "under" | "fair" | "over",
+  "reasoning": string
+}`;
 
-    const { experimental_output } = await generateText({
-      model,
-      experimental_output: Output.object({ schema: OutputSchema }),
-      prompt,
-    });
-
-    return experimental_output;
+    const { text } = await generateText({ model, prompt });
+    const parsed = OutputSchema.parse(extractJson(text));
+    return parsed;
   });
