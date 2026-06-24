@@ -17,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Estate Karachi — Find your next property" },
+      { title: "abaad.com — Find your next property in Karachi" },
       { name: "description", content: "Karachi's curated marketplace for buying, renting, and listing properties. Browse flats, plots, and commercial spaces from verified realtors." },
-      { property: "og:title", content: "Estate Karachi" },
+      { property: "og:title", content: "abaad.com" },
       { property: "og:description", content: "Find your next property in Karachi." },
     ],
   }),
