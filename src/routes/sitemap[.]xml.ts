@@ -11,6 +11,8 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const staticPaths = [
           { path: "/", priority: "1.0", changefreq: "daily" as const },
+          { path: "/rent", priority: "0.9", changefreq: "daily" as const },
+          { path: "/packages", priority: "0.8", changefreq: "monthly" as const },
           { path: "/about", priority: "0.6", changefreq: "monthly" as const },
           { path: "/contact", priority: "0.6", changefreq: "monthly" as const },
           { path: "/list", priority: "0.7", changefreq: "weekly" as const },

@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RentRouteImport } from './routes/rent'
+import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
@@ -19,6 +21,16 @@ import { Route as PropertySlugRouteImport } from './routes/property.$slug'
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RentRoute = RentRouteImport.update({
+  id: '/rent',
+  path: '/rent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListRoute = ListRouteImport.update({
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/packages': typeof PackagesRoute
+  '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/property/$slug': typeof PropertySlugRoute
 }
@@ -60,6 +74,8 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/packages': typeof PackagesRoute
+  '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/property/$slug': typeof PropertySlugRoute
 }
@@ -69,6 +85,8 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/packages': typeof PackagesRoute
+  '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/property/$slug': typeof PropertySlugRoute
 }
@@ -79,16 +97,28 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/list'
+    | '/packages'
+    | '/rent'
     | '/sitemap.xml'
     | '/property/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/contact' | '/list' | '/sitemap.xml' | '/property/$slug'
+  to:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/list'
+    | '/packages'
+    | '/rent'
+    | '/sitemap.xml'
+    | '/property/$slug'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/contact'
     | '/list'
+    | '/packages'
+    | '/rent'
     | '/sitemap.xml'
     | '/property/$slug'
   fileRoutesById: FileRoutesById
@@ -98,6 +128,8 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   ListRoute: typeof ListRoute
+  PackagesRoute: typeof PackagesRoute
+  RentRoute: typeof RentRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PropertySlugRoute: typeof PropertySlugRoute
 }
@@ -109,6 +141,20 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rent': {
+      id: '/rent'
+      path: '/rent'
+      fullPath: '/rent'
+      preLoaderRoute: typeof RentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list': {
@@ -154,19 +200,11 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   ListRoute: ListRoute,
+  PackagesRoute: PackagesRoute,
+  RentRoute: RentRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   PropertySlugRoute: PropertySlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
