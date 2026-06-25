@@ -57,6 +57,22 @@ export function subscribeListings(l: Listener) {
   return () => listeners.delete(l);
 }
 
+export function slugify(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+export function propertySlug(p: Pick<Property, "id" | "title">) {
+  return `${slugify(p.title)}-${p.id}`;
+}
+export function getAllProperties(): Property[] {
+  return [...listings, ...SEED_PROPERTIES];
+}
+export function findPropertyBySlug(slug: string): Property | undefined {
+  const m = slug.match(/-(\d+)$/);
+  if (!m) return undefined;
+  const id = Number(m[1]);
+  return getAllProperties().find((p) => p.id === id);
+}
+
 export const PACKAGES = [
   { tier: "Silver" as const, price: 50000, perks: ["1 active listing", "30-day visibility", "Standard placement"] },
   { tier: "Gold" as const, price: 75000, perks: ["3 active listings", "60-day visibility", "Featured badge", "AI listing assistant"] },

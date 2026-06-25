@@ -1,10 +1,15 @@
 import { Bed, Bath, Maximize, MapPin, Star } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
-import type { Property } from "@/lib/properties";
+import { propertySlug, type Property } from "@/lib/properties";
 
 export function PropertyCard({ p }: { p: Property }) {
   return (
-    <article className="group overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg">
+    <Link
+      to="/property/$slug"
+      params={{ slug: propertySlug(p) }}
+      className="group block overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg"
+    >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
         <img
           src={p.image}
@@ -46,6 +51,6 @@ export function PropertyCard({ p }: { p: Property }) {
         </div>
         <p className="mt-3 text-xs text-muted-foreground">by <span className="text-foreground font-medium">{p.realtor}</span></p>
       </div>
-    </article>
+    </Link>
   );
 }
