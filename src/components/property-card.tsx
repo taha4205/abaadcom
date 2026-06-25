@@ -51,6 +51,6 @@ export function PropertyCard({ p }: { p: Property }) {
         </div>
         <p className="mt-3 text-xs text-muted-foreground">by <span className="text-foreground font-medium">{p.realtor}</span></p>
       </div>
-    </article>
+    </Link>
   );
 }
