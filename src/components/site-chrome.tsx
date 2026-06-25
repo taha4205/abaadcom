@@ -16,8 +16,9 @@ export function Header() {
         <nav className="hidden items-center gap-7 text-sm md:flex">
           <Link to="/" className="text-foreground hover:text-navy">Buy</Link>
           <Link to="/" className="text-muted-foreground hover:text-navy">Rent</Link>
-          <Link to="/list" className="text-muted-foreground hover:text-navy">Realtors</Link>
           <Link to="/list" className="text-muted-foreground hover:text-navy">Packages</Link>
+          <Link to="/about" className="text-muted-foreground hover:text-navy">About</Link>
+          <Link to="/contact" className="text-muted-foreground hover:text-navy">Contact</Link>
         </nav>
         <div className="flex items-center gap-2">
           <Button variant="ghost" className="hidden text-sm md:inline-flex">Sign in</Button>
@@ -37,8 +38,14 @@ export function Footer() {
         <p className="font-display text-base tracking-tight">
           abaad<span className="text-green">.</span>com
         </p>
+        <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-navy">Browse</Link>
+          <Link to="/list" className="hover:text-navy">List property</Link>
+          <Link to="/about" className="hover:text-navy">About</Link>
+          <Link to="/contact" className="hover:text-navy">Contact</Link>
+        </nav>
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} abaad.com — A marketplace for verified realtors in Karachi.
+          © {new Date().getFullYear()} abaad.com
         </p>
       </div>
     </footer>
