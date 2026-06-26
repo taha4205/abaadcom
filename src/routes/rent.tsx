@@ -34,10 +34,11 @@ export const Route = createFileRoute("/rent")({
 type RentCategory = Exclude<Category, "plot">;
 
 function useListings() {
+  useEffect(() => { fetchLiveListings(); }, []);
   return useSyncExternalStore(
     (cb) => subscribeListings(cb),
-    () => getListings(),
-    () => getListings(),
+    () => getLiveListings(),
+    () => getLiveListings(),
   );
 }
 
