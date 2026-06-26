@@ -56,7 +56,7 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     checkAuth(data.email, data.password);
-    const patch: Record<string, unknown> = {};
+    const patch: { verified?: boolean; is_active?: boolean } = {};
     if (data.verified !== undefined) patch.verified = data.verified;
     if (data.is_active !== undefined) patch.is_active = data.is_active;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
