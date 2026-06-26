@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Header, Footer } from "@/components/site-chrome";
 import { PropertyCard } from "@/components/property-card";
 import {
-  KARACHI_AREAS, SEED_PROPERTIES, getListings, subscribeListings,
+  KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
   type Category,
 } from "@/lib/properties";
 
@@ -34,10 +34,11 @@ export const Route = createFileRoute("/rent")({
 type RentCategory = Exclude<Category, "plot">;
 
 function useListings() {
+  useEffect(() => { fetchLiveListings(); }, []);
   return useSyncExternalStore(
     (cb) => subscribeListings(cb),
-    () => getListings(),
-    () => getListings(),
+    () => getLiveListings(),
+    () => getLiveListings(),
   );
 }
 

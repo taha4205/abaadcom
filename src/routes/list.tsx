@@ -1,463 +1,235 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Check, Sparkles, Loader2, ArrowLeft, Building2, Home, Store, TreePine,
-  CheckCircle2, AlertTriangle, TrendingDown, MapPin, Wand2,
+  Loader2, Building2, Home, Store, TreePine, Sparkles, LogIn, Clock, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Header, Footer } from "@/components/site-chrome";
+import { AuthModal } from "@/components/auth-modal";
 import {
-  KARACHI_AREAS, PACKAGES, addListing, formatPKR,
-  type Intent, type Category,
+  KARACHI_AREAS, formatPKR, type Intent, type Category,
 } from "@/lib/properties";
-import { assistListing, type ListingAiResult } from "@/lib/listing-ai.functions";
+import { useAuth } from "@/lib/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { estimatePrice } from "@/lib/price-estimator.functions";
 
 export const Route = createFileRoute("/list")({
   head: () => ({
     meta: [
       { title: "List your property — abaad.com" },
-      { name: "description", content: "Pick a realtor package and list your Karachi property on abaad.com. Get AI help writing the listing and pricing it fairly." },
-      { property: "og:title", content: "List on abaad.com" },
-      { property: "og:description", content: "Realtor packages and AI-assisted listing for Karachi properties." },
+      { name: "description", content: "Sign in as an approved realtor to list your Karachi property on abaad.com." },
     ],
   }),
   component: ListPage,
 });
 
-const UNSPLASH = [
-  "photo-1568605114967-8130f3a36994",
-  "photo-1600596542815-ffad4c1539a9",
-  "photo-1613490493576-7fde63acd811",
-  "photo-1564013799919-ab600027ffc6",
-  "photo-1570129477492-45c003edd2be",
-  "photo-1600585154340-be6161a56a0c",
-];
-
-type Tier = "Silver" | "Gold" | "Platinum";
-
 function ListPage() {
-  const [tier, setTier] = useState<Tier | null>(null);
+  const { user, realtor, loading } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        {tier ? (
-          <ListingForm tier={tier} onBack={() => setTier(null)} />
-        ) : (
-          <Packages onPick={setTier} />
-        )}
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-green">For realtors</p>
+          <h1 className="mt-2 text-3xl font-medium tracking-tight sm:text-4xl">List a property</h1>
+        </div>
+
+        <div className="mt-10">
+          {loading ? (
+            <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          ) : !user ? (
+            <Card>
+              <LogIn className="h-10 w-10 text-navy" />
+              <h2 className="mt-4 font-display text-xl">Sign in to list your property</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Listings on abaad.com are for approved realtors only. Sign in or create an account to continue.</p>
+              <Button onClick={() => setAuthOpen(true)} className="mt-6 bg-navy text-navy-foreground hover:bg-navy/90">Sign in / Create account</Button>
+            </Card>
+          ) : !realtor ? (
+            <Card><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /><p className="mt-3 text-sm text-muted-foreground">Loading your profile…</p></Card>
+          ) : realtor.status === "pending" ? (
+            <Card>
+              <Clock className="h-10 w-10 text-amber-500" />
+              <h2 className="mt-4 font-display text-xl">Your account is under review</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Thanks, {realtor.full_name}. We'll contact you on WhatsApp ({realtor.phone}) once approved. Your selected package: <strong>{realtor.package_tier}</strong>.</p>
+            </Card>
+          ) : realtor.status === "rejected" ? (
+            <Card><p className="text-sm text-destructive">Your account application was rejected. Please contact support.</p></Card>
+          ) : (
+            <ListingForm realtorId={realtor.id} tier={realtor.package_tier} />
+          )}
+        </div>
       </main>
       <Footer />
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </div>
   );
 }
 
-function Packages({ onPick }: { onPick: (t: Tier) => void }) {
-  return (
-    <div>
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-medium uppercase tracking-wider text-green">For realtors</p>
-        <h1 className="mt-2 text-3xl font-medium tracking-tight sm:text-4xl">
-          Pick a package to start listing
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-          Listings on abaad.com are realtor-only. Pick a package, get connected directly with buyers and tenants — no middlemen.
-        </p>
-      </div>
-
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
-        {PACKAGES.map((p) => {
-          const featured = p.tier === "Gold";
-          return (
-            <article
-              key={p.tier}
-              className={`relative flex flex-col rounded-2xl border p-6 transition hover:shadow-lg sm:p-8 ${
-                featured
-                  ? "border-navy/30 bg-card shadow-[0_30px_60px_-30px_rgba(15,23,42,0.25)] md:scale-[1.02]"
-                  : "border-border bg-card"
-              }`}
-            >
-              {featured && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 border-0 bg-green text-green-foreground">
-                  Most popular
-                </Badge>
-              )}
-              <p className="font-display text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                {p.tier}
-              </p>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-medium tracking-tight text-navy">
-                  {p.price.toLocaleString("en-PK")}
-                </span>
-                <span className="text-sm text-muted-foreground">PKR</span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">one-time</p>
-
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.perks.map((perk) => (
-                  <li key={perk} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-green" />
-                    <span>{perk}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={() => {
-                  toast.success(`${p.tier} package selected · PKR ${p.price.toLocaleString("en-PK")}`, {
-                    description: "Payment is simulated for this demo.",
-                  });
-                  onPick(p.tier);
-                }}
-                className={`mt-8 h-11 w-full ${
-                  featured
-                    ? "bg-navy text-navy-foreground hover:bg-navy/90"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/70"
-                }`}
-              >
-                Choose {p.tier}
-              </Button>
-            </article>
-          );
-        })}
-      </div>
-
-      <p className="mx-auto mt-8 max-w-xl text-center text-xs text-muted-foreground">
-        This is a demo paywall. No payment is collected. Real Stripe / bank checkout can be wired in once you're ready to go live.
-      </p>
-    </div>
-  );
+function Card({ children }: { children: React.ReactNode }) {
+  return <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-10 text-center">{children}</div>;
 }
 
-function ListingForm({ tier, onBack }: { tier: Tier; onBack: () => void }) {
-  const navigate = useNavigate();
-  const assist = useServerFn(assistListing);
-
+function ListingForm({ realtorId, tier }: { realtorId: string; tier: "Silver" | "Gold" | "Platinum" }) {
+  const estimate = useServerFn(estimatePrice);
   const [intent, setIntent] = useState<Intent>("buy");
   const [category, setCategory] = useState<Category>("house");
   const [area, setArea] = useState("DHA Phase 6");
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [beds, setBeds] = useState(3);
   const [baths, setBaths] = useState(3);
-  const [size, setSize] = useState(2500);
+  const [size, setSize] = useState(500);
   const [price, setPrice] = useState(50000000);
-  const [realtor, setRealtor] = useState("");
-  const [plotSize, setPlotSize] = useState<[number, number]>([200, 800]);
-
+  const [whatsapp, setWhatsapp] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
-  const [ai, setAi] = useState<ListingAiResult | null>(null);
+  const [aiText, setAiText] = useState<string | null>(null);
 
-  const filteredAreas = KARACHI_AREAS.filter((a) => a !== "Any area");
-  const unit = category === "plot" ? "sq yd" : "sq ft";
+  // Past listings
+  const [mine, setMine] = useState<any[]>([]);
+  useEffect(() => {
+    supabase.from("listings").select("*").eq("realtor_id", realtorId).order("created_at", { ascending: false }).then(({ data }) => setMine(data ?? []));
+  }, [realtorId, busy]);
 
-  async function runAi() {
-    if (!area || !size || !price) {
-      toast.error("Add area, size and price first.");
-      return;
-    }
+  async function runEstimate() {
     setAiBusy(true);
+    setAiText(null);
     try {
-      const result = await assist({
-        data: {
-          area, category, intent,
-          beds: category === "plot" || category === "commercial" ? 0 : beds,
-          baths: category === "plot" ? 0 : baths,
-          size: category === "plot" ? plotSize[1] : size,
-          price,
-          rawTitle: title,
-          rawDescription: description,
-        },
-      });
-      setAi(result);
-      toast.success("AI assistant ready");
-    } catch (err) {
-      console.error(err);
-      toast.error("AI assistant failed", { description: err instanceof Error ? err.message : "Try again." });
+      const r = await estimate({ data: { area, category, intent, size, beds, baths } });
+      setAiText(r.estimate);
+    } catch (e: any) {
+      toast.error(e?.message ?? "AI unavailable");
     } finally {
       setAiBusy(false);
     }
   }
 
-  function applyAiCopy() {
-    if (!ai) return;
-    setTitle(ai.polishedTitle);
-    setDescription(ai.polishedDescription);
-    toast.success("Applied AI copy");
-  }
-
-  function submitListing() {
-    if (!title.trim() || !realtor.trim() || !price || !size) {
-      toast.error("Fill title, realtor name, size and price.");
-      return;
-    }
-    const finalSize = category === "plot" ? plotSize[1] : size;
-    const image = `https://images.unsplash.com/${UNSPLASH[Math.floor(Math.random() * UNSPLASH.length)]}?w=900&q=80&auto=format&fit=crop`;
-    addListing({
-      title: title.trim(),
-      area,
-      price: formatPKR(price, intent),
-      priceNum: price,
-      intent,
-      category,
-      beds: category === "plot" || category === "commercial" ? 0 : beds,
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) return toast.error("Title required");
+    setBusy(true);
+    const { error } = await supabase.from("listings").insert({
+      realtor_id: realtorId, title, area, intent, category,
+      beds: category === "plot" ? 0 : beds,
       baths: category === "plot" ? 0 : baths,
-      size: finalSize,
-      featured: tier !== "Silver",
-      realtor: realtor.trim(),
-      image,
-      tier,
+      size_sqyd: size, price_num: price, price_text: formatPKR(price, intent),
+      tier, whatsapp_number: whatsapp || null, image_url: imageUrl || null,
     });
-    toast.success("Listing published", { description: "It's live on the homepage." });
-    navigate({ to: "/" });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Listing published!");
+    setTitle(""); setImageUrl("");
   }
 
+  const cats: { v: Category; l: string; Icon: any }[] = [
+    { v: "flat", l: "Flat", Icon: Building2 },
+    { v: "house", l: "House", Icon: Home },
+    { v: "commercial", l: "Shop", Icon: Store },
+    { v: "plot", l: "Plot", Icon: TreePine },
+  ];
+
   return (
-    <div>
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Change package
-      </button>
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-display text-xl">New listing</h2>
+          <Badge className="bg-navy text-navy-foreground">{tier} tier</Badge>
+        </div>
+        <form onSubmit={submit} className="space-y-5">
+          <div><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Modern 3-bed apartment with sea view" required /></div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
-          List your property
-        </h1>
-        <Badge className={
-          tier === "Platinum" ? "bg-navy text-navy-foreground"
-            : tier === "Gold" ? "bg-green text-green-foreground"
-            : "bg-secondary text-secondary-foreground"
-        }>{tier} package</Badge>
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Fill the same details a buyer searches by. Use the AI assistant on the right to fact-check your price and polish the copy.
-      </p>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
-        {/* FORM */}
-        <div className="space-y-6 rounded-2xl border border-border bg-card p-5 sm:p-7">
-          <Section label="Looking to">
-            <div className="inline-flex rounded-full border border-border bg-secondary p-1">
-              {(["buy", "rent"] as Intent[]).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setIntent(opt)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    intent === opt ? "bg-navy text-navy-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {opt === "buy" ? "Sell" : "Rent out"}
-                </button>
-              ))}
-            </div>
-          </Section>
-
-          <Section label="Property type">
-            <div className="grid grid-cols-4 gap-1 rounded-md border border-border bg-secondary p-1">
-              {([
-                { v: "flat" as Category, l: "Flat", Icon: Building2 },
-                { v: "house" as Category, l: "House", Icon: Home },
-                { v: "commercial" as Category, l: "Shop", Icon: Store },
-                { v: "plot" as Category, l: "Plot", Icon: TreePine },
-              ]).map(({ v, l, Icon }) => (
-                <button
-                  key={v}
-                  onClick={() => setCategory(v)}
-                  className={`flex h-12 flex-col items-center justify-center gap-0.5 rounded text-[11px] font-medium transition ${
-                    category === v ? "bg-card text-navy shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {l}
-                </button>
-              ))}
-            </div>
-          </Section>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Section label="Area">
-              <Select value={area} onValueChange={setArea}>
-                <SelectTrigger className="h-11 w-full"><MapPin className="mr-2 h-4 w-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
-                <SelectContent>{filteredAreas.map((a) => (<SelectItem key={a} value={a}>{a}</SelectItem>))}</SelectContent>
-              </Select>
-            </Section>
-            <Section label="Realtor / Agency name">
-              <Input value={realtor} onChange={(e) => setRealtor(e.target.value)} placeholder="e.g. Skyline Realty" className="h-11" />
-            </Section>
-          </div>
-
-          {category === "plot" ? (
-            <Section label={`Plot size range (${unit})`}>
-              <div className="mb-2 flex items-end justify-between">
-                <span className="text-xs text-muted-foreground">Range buyers should match</span>
-                <span className="text-sm font-medium tabular-nums">{plotSize[0]} – {plotSize[1]} {unit}</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Intent</Label>
+              <div className="mt-1 inline-flex rounded-md border border-border bg-secondary p-1">
+                {(["buy","rent"] as Intent[]).map((o) => (
+                  <button type="button" key={o} onClick={() => setIntent(o)} className={`rounded px-4 py-1.5 text-sm font-medium capitalize ${intent === o ? "bg-card text-navy shadow-sm" : "text-muted-foreground"}`}>{o === "buy" ? "Sell" : "Rent"}</button>
+                ))}
               </div>
-              <Slider value={plotSize} onValueChange={(v) => setPlotSize([v[0], v[1]] as [number, number])} min={80} max={2000} step={20} />
-            </Section>
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-3">
-              {category !== "commercial" && (
-                <Section label="Bedrooms">
-                  <Input type="number" min={0} max={20} value={beds} onChange={(e) => setBeds(Number(e.target.value))} className="h-11" />
-                </Section>
-              )}
-              <Section label="Bathrooms">
-                <Input type="number" min={0} max={20} value={baths} onChange={(e) => setBaths(Number(e.target.value))} className="h-11" />
-              </Section>
-              <Section label={`Covered area (${unit})`}>
-                <Input type="number" min={1} value={size} onChange={(e) => setSize(Number(e.target.value))} className="h-11" />
-              </Section>
             </div>
-          )}
-
-          <Section label={intent === "rent" ? "Monthly rent (PKR)" : "Asking price (PKR)"}>
-            <Input type="number" min={1} value={price} onChange={(e) => setPrice(Number(e.target.value))} className="h-11" />
-            <p className="mt-1 text-xs text-muted-foreground">{formatPKR(price || 0, intent)}</p>
-          </Section>
-
-          <Section label="Listing title">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. 5-Bed Bungalow with Lawn in DHA Phase 6" className="h-11" />
-          </Section>
-
-          <Section label="Description">
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Highlight features buyers care about — view, location, condition, parking, etc." rows={4} />
-          </Section>
-
-          <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
-            <Button variant="outline" onClick={runAi} disabled={aiBusy} className="h-11">
-              {aiBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              {ai ? "Re-run AI assistant" : "Get AI help"}
-            </Button>
-            <Button onClick={submitListing} className="h-11 bg-navy text-navy-foreground hover:bg-navy/90">
-              Publish listing
-            </Button>
+            <div>
+              <Label>Area</Label>
+              <Select value={area} onValueChange={setArea}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{KARACHI_AREAS.filter((a) => a !== "Any area").map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        {/* AI PANEL */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <AiPanel ai={ai} busy={aiBusy} onRun={runAi} onApply={applyAiCopy} askingPrice={price} intent={intent} />
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <Label className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</Label>
-      {children}
-    </div>
-  );
-}
-
-function AiPanel({
-  ai, busy, onRun, onApply, askingPrice, intent,
-}: {
-  ai: ListingAiResult | null;
-  busy: boolean;
-  onRun: () => void;
-  onApply: () => void;
-  askingPrice: number;
-  intent: Intent;
-}) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-navy/15 bg-gradient-to-br from-navy to-navy/90 text-navy-foreground">
-      <div className="p-5 sm:p-6">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-green text-green-foreground">
-            <Wand2 className="h-4 w-4" />
-          </div>
           <div>
-            <p className="text-sm font-medium">Listing assistant</p>
-            <p className="text-[11px] text-white/60">AI-powered · Karachi market</p>
-          </div>
-        </div>
-
-        {!ai && !busy && (
-          <p className="mt-4 text-sm text-white/75">
-            I'll polish your title and description, and fact-check your asking price against the Karachi market. Fill the basics on the left, then run me.
-          </p>
-        )}
-
-        {busy && (
-          <div className="mt-6 flex items-center gap-2 text-sm text-white/80">
-            <Loader2 className="h-4 w-4 animate-spin" /> Checking market data…
-          </div>
-        )}
-
-        {ai && !busy && (
-          <div className="mt-5 space-y-5 text-sm">
-            <Verdict ai={ai} askingPrice={askingPrice} intent={intent} />
-
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-white/55">Suggested title</p>
-              <p className="mt-1 font-display text-base leading-snug">{ai.polishedTitle}</p>
+            <Label>Category</Label>
+            <div className="mt-1 grid grid-cols-4 gap-1 rounded-md border border-border bg-secondary p-1">
+              {cats.map(({ v, l, Icon }) => (
+                <button type="button" key={v} onClick={() => setCategory(v)} className={`flex h-12 flex-col items-center justify-center gap-0.5 rounded text-[11px] font-medium ${category === v ? "bg-card text-navy shadow-sm" : "text-muted-foreground"}`}>
+                  <Icon className="h-4 w-4" />{l}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-white/55">Suggested description</p>
-              <p className="mt-1 text-sm leading-relaxed text-white/85">{ai.polishedDescription}</p>
-            </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div><Label>Beds</Label><Input type="number" min={0} value={beds} onChange={(e) => setBeds(Number(e.target.value))} disabled={category === "plot"} /></div>
+            <div><Label>Baths</Label><Input type="number" min={0} value={baths} onChange={(e) => setBaths(Number(e.target.value))} disabled={category === "plot"} /></div>
+            <div><Label>Size (sq yd)</Label><Input type="number" min={1} value={size} onChange={(e) => setSize(Number(e.target.value))} /></div>
+          </div>
 
-            <Button onClick={onApply} className="w-full bg-green text-green-foreground hover:bg-green/90">
-              Apply AI copy to form
+          <div>
+            <Label>Price (PKR{intent === "rent" ? " / month" : ""})</Label>
+            <Input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+            <Button type="button" variant="outline" onClick={runEstimate} disabled={aiBusy} className="mt-2 text-xs">
+              {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+              Estimate fair price with AI
             </Button>
+            {aiText && (
+              <div className="mt-3 rounded-md border-l-4 border-green bg-green/5 p-3 text-sm">
+                <p className="text-xs font-medium uppercase tracking-wider text-green">AI estimate</p>
+                <p className="mt-1 text-foreground/90">{aiText}</p>
+              </div>
+            )}
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div><Label>WhatsApp number</Label><Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="923001234567" /></div>
+            <div><Label>Image URL</Label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" /></div>
+          </div>
+
+          <Button type="submit" disabled={busy} className="w-full bg-navy text-navy-foreground hover:bg-navy/90">
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />} Publish listing
+          </Button>
+        </form>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <h2 className="font-display text-xl">My listings ({mine.length})</h2>
+        {mine.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">You haven't listed anything yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {mine.map((m) => (
+              <li key={m.id} className="flex items-center justify-between py-3 text-sm">
+                <div>
+                  <p className="font-medium">{m.title}</p>
+                  <p className="text-xs text-muted-foreground">{m.area} · {m.price_text}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {m.verified && <Badge className="bg-green text-green-foreground"><CheckCircle2 className="mr-1 h-3 w-3" /> Verified</Badge>}
+                  {!m.is_active && <Badge variant="outline">Inactive</Badge>}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
-
-      <div className="border-t border-white/10 bg-white/5 px-5 py-3 sm:px-6">
-        <button
-          onClick={onRun}
-          disabled={busy}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-white/80 hover:text-white disabled:opacity-50"
-        >
-          <Sparkles className="h-3.5 w-3.5" /> {ai ? "Re-analyze" : "Run analysis"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Verdict({ ai, askingPrice, intent }: { ai: ListingAiResult; askingPrice: number; intent: Intent }) {
-  const tone =
-    ai.verdict === "fair" ? { Icon: CheckCircle2, bg: "bg-green/15 border-green/30 text-green", label: "Fairly priced" }
-      : ai.verdict === "over" ? { Icon: AlertTriangle, bg: "bg-orange-400/15 border-orange-400/30 text-orange-300", label: "Priced above market" }
-      : { Icon: TrendingDown, bg: "bg-sky-400/15 border-sky-400/30 text-sky-300", label: "Priced below market" };
-  return (
-    <div className={`rounded-lg border p-3 ${tone.bg}`}>
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
-        <tone.Icon className="h-3.5 w-3.5" /> {tone.label}
-      </div>
-      <p className="mt-2 text-[13px] leading-relaxed text-white/85">{ai.reasoning}</p>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[11px]">
-        <Stat label="Your ask" value={formatPKR(askingPrice, intent)} />
-        <Stat label="Fair min" value={formatPKR(ai.fairMin, intent)} />
-        <Stat label="Fair max" value={formatPKR(ai.fairMax, intent)} />
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md bg-white/10 px-2 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-white/55">{label}</p>
-      <p className="mt-0.5 text-xs font-medium text-white">{value}</p>
     </div>
   );
 }

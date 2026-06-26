@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Bed, Bath, Maximize, MapPin, ArrowLeft, Phone, Mail, Star } from "lucide-react";
+import { Bed, Bath, Maximize, MapPin, ArrowLeft, Phone, Mail, Star, ShieldCheck, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Header, Footer } from "@/components/site-chrome";
@@ -82,7 +82,11 @@ function PropertyPage() {
           <div className="lg:col-span-2">
             <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-secondary">
               <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
-              {p.featured && (
+              {p.verified ? (
+                <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
+                  <ShieldCheck className="mr-1 h-3 w-3" /> Verified
+                </Badge>
+              ) : p.featured && (
                 <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
                   <Star className="mr-1 h-3 w-3 fill-current" /> Featured
                 </Badge>
@@ -129,7 +133,15 @@ function PropertyPage() {
                 <Badge className="mt-2 border-0 bg-navy text-navy-foreground">{p.tier} realtor</Badge>
               )}
               <div className="mt-5 space-y-2">
-                <Button className="w-full bg-navy text-navy-foreground hover:bg-navy/90">
+                <a
+                  href={`https://wa.me/${(p.whatsapp ?? "923001234567").replace(/\D/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in: ${p.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-green px-3 py-2 text-sm font-medium text-green-foreground hover:bg-green/90"
+                >
+                  <MessageCircle className="h-4 w-4" /> WhatsApp Realtor
+                </a>
+                <Button variant="outline" className="w-full">
                   <Phone className="mr-2 h-4 w-4" /> Call realtor
                 </Button>
                 <Button variant="outline" className="w-full">

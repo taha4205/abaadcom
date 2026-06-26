@@ -1,8 +1,10 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export type Intent = "buy" | "rent";
 export type Category = "flat" | "house" | "commercial" | "plot";
 
 export type Property = {
-  id: number;
+  id: number | string;
   title: string;
   area: string;
   price: string;
@@ -16,6 +18,8 @@ export type Property = {
   realtor: string;
   image: string;
   tier?: "Silver" | "Gold" | "Platinum";
+  verified?: boolean;
+  whatsapp?: string;
 };
 
 export const KARACHI_AREAS = [
@@ -26,35 +30,64 @@ export const KARACHI_AREAS = [
 ];
 
 const U = (id: string) => `https://images.unsplash.com/${id}?w=900&q=80&auto=format&fit=crop`;
+const DUMMY_WA = "923001234567";
 
 export const SEED_PROPERTIES: Property[] = [
-  { id: 1, title: "Modern 3-Bed Apartment with Sea View", area: "Clifton", price: "PKR 4.85 Cr", priceNum: 48500000, intent: "buy", category: "flat", beds: 3, baths: 3, size: 2200, featured: true, realtor: "Skyline Realty", image: U("photo-1545324418-cc1a3fa10c00") },
-  { id: 2, title: "500 Sq Yd Corner Plot, Prime Location", area: "DHA Phase 8", price: "PKR 9.2 Cr", priceNum: 92000000, intent: "buy", category: "plot", beds: 0, baths: 0, size: 500, featured: true, realtor: "Coastline Estates", image: U("photo-1500382017468-9049fed747ef") },
-  { id: 3, title: "Furnished 2-Bed Flat for Rent", area: "Bahadurabad", price: "PKR 145,000/mo", priceNum: 145000, intent: "rent", category: "flat", beds: 2, baths: 2, size: 1400, featured: false, realtor: "Metro Homes", image: U("photo-1502672260266-1c1ef2d93688") },
-  { id: 4, title: "Commercial Ground Floor Shop", area: "Tariq Road", price: "PKR 380,000/mo", priceNum: 380000, intent: "rent", category: "commercial", beds: 0, baths: 1, size: 900, featured: true, realtor: "Prime Commercial", image: U("photo-1604328698692-f76ea9498e76") },
-  { id: 5, title: "5-Bed Bungalow with Lawn & Servant Quarters", area: "DHA Phase 6", price: "PKR 18.5 Cr", priceNum: 185000000, intent: "buy", category: "house", beds: 5, baths: 6, size: 4500, featured: false, realtor: "Coastline Estates", image: U("photo-1568605114967-8130f3a36994") },
-  { id: 6, title: "240 Sq Yd Residential Plot", area: "Bahria Town Karachi", price: "PKR 1.65 Cr", priceNum: 16500000, intent: "buy", category: "plot", beds: 0, baths: 0, size: 240, featured: false, realtor: "Bahria Listings", image: U("photo-1486325212027-8081e485255e") },
-  { id: 7, title: "Studio Apartment, Brand New Building", area: "Gulshan-e-Iqbal", price: "PKR 65,000/mo", priceNum: 65000, intent: "rent", category: "flat", beds: 1, baths: 1, size: 650, featured: false, realtor: "Metro Homes", image: U("photo-1522708323590-d24dbb6b0267") },
-  { id: 8, title: "1,000 Sq Ft Office on Sharah-e-Faisal", area: "Saddar", price: "PKR 2.4 Cr", priceNum: 24000000, intent: "buy", category: "commercial", beds: 0, baths: 2, size: 1000, featured: false, realtor: "Prime Commercial", image: U("photo-1497366216548-37526070297c") },
-  { id: 9, title: "Double-Storey Bungalow, Fully Renovated", area: "DHA Phase 5", price: "PKR 12.75 Cr", priceNum: 127500000, intent: "buy", category: "house", beds: 4, baths: 5, size: 3200, featured: true, realtor: "Skyline Realty", image: U("photo-1600596542815-ffad4c1539a9") },
+  { id: 1, title: "Modern 3-Bed Apartment with Sea View", area: "Clifton", price: "PKR 4.85 Cr", priceNum: 48500000, intent: "buy", category: "flat", beds: 3, baths: 3, size: 2200, featured: true, realtor: "Skyline Realty", image: U("photo-1545324418-cc1a3fa10c00"), verified: true, whatsapp: DUMMY_WA },
+  { id: 2, title: "500 Sq Yd Corner Plot, Prime Location", area: "DHA Phase 8", price: "PKR 9.2 Cr", priceNum: 92000000, intent: "buy", category: "plot", beds: 0, baths: 0, size: 500, featured: true, realtor: "Coastline Estates", image: U("photo-1500382017468-9049fed747ef"), verified: true, whatsapp: DUMMY_WA },
+  { id: 3, title: "Furnished 2-Bed Flat for Rent", area: "Bahadurabad", price: "PKR 145,000/mo", priceNum: 145000, intent: "rent", category: "flat", beds: 2, baths: 2, size: 1400, featured: false, realtor: "Metro Homes", image: U("photo-1502672260266-1c1ef2d93688"), whatsapp: DUMMY_WA },
+  { id: 4, title: "Commercial Ground Floor Shop", area: "Tariq Road", price: "PKR 380,000/mo", priceNum: 380000, intent: "rent", category: "commercial", beds: 0, baths: 1, size: 900, featured: true, realtor: "Prime Commercial", image: U("photo-1604328698692-f76ea9498e76"), whatsapp: DUMMY_WA },
+  { id: 5, title: "5-Bed Bungalow with Lawn & Servant Quarters", area: "DHA Phase 6", price: "PKR 18.5 Cr", priceNum: 185000000, intent: "buy", category: "house", beds: 5, baths: 6, size: 4500, featured: false, realtor: "Coastline Estates", image: U("photo-1568605114967-8130f3a36994"), verified: true, whatsapp: DUMMY_WA },
+  { id: 6, title: "240 Sq Yd Residential Plot", area: "Bahria Town Karachi", price: "PKR 1.65 Cr", priceNum: 16500000, intent: "buy", category: "plot", beds: 0, baths: 0, size: 240, featured: false, realtor: "Bahria Listings", image: U("photo-1486325212027-8081e485255e"), whatsapp: DUMMY_WA },
+  { id: 7, title: "Studio Apartment, Brand New Building", area: "Gulshan-e-Iqbal", price: "PKR 65,000/mo", priceNum: 65000, intent: "rent", category: "flat", beds: 1, baths: 1, size: 650, featured: false, realtor: "Metro Homes", image: U("photo-1522708323590-d24dbb6b0267"), whatsapp: DUMMY_WA },
+  { id: 8, title: "1,000 Sq Ft Office on Sharah-e-Faisal", area: "Saddar", price: "PKR 2.4 Cr", priceNum: 24000000, intent: "buy", category: "commercial", beds: 0, baths: 2, size: 1000, featured: false, realtor: "Prime Commercial", image: U("photo-1497366216548-37526070297c"), whatsapp: DUMMY_WA },
+  { id: 9, title: "Double-Storey Bungalow, Fully Renovated", area: "DHA Phase 5", price: "PKR 12.75 Cr", priceNum: 127500000, intent: "buy", category: "house", beds: 4, baths: 5, size: 3200, featured: true, realtor: "Skyline Realty", image: U("photo-1600596542815-ffad4c1539a9"), verified: true, whatsapp: DUMMY_WA },
 ];
 
-// In-memory cross-page listing store (user-added listings).
-let listings: Property[] = [];
-let nextId = 1000;
+// Cached live listings from supabase (merged with seed on home page).
+let liveListings: Property[] = [];
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
-export function getListings() { return listings; }
-export function addListing(p: Omit<Property, "id">) {
-  const item = { ...p, id: nextId++ };
-  listings = [item, ...listings];
-  listeners.forEach((l) => l());
-  return item;
+export function getLiveListings() { return liveListings; }
+export function subscribeListings(l: Listener) { listeners.add(l); return () => { listeners.delete(l); }; }
+
+function rowToProperty(row: any): Property {
+  return {
+    id: row.id,
+    title: row.title,
+    area: row.area,
+    price: row.price_text,
+    priceNum: Number(row.price_num),
+    intent: row.intent,
+    category: row.category,
+    beds: row.beds ?? 0,
+    baths: row.baths ?? 0,
+    size: row.size_sqyd ?? 0,
+    featured: row.tier === "Platinum" || row.tier === "Gold",
+    realtor: row.realtor?.agency_name ?? "abaad realtor",
+    image: row.image_url || U("photo-1568605114967-8130f3a36994"),
+    tier: row.tier,
+    verified: !!row.verified,
+    whatsapp: row.whatsapp_number || undefined,
+  };
 }
-export function subscribeListings(l: Listener) {
-  listeners.add(l);
-  return () => listeners.delete(l);
+
+export async function fetchLiveListings(): Promise<Property[]> {
+  try {
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*, realtor:realtors!inner(agency_name, status)")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    const filtered = data.filter((r: any) => r.realtor?.status === "approved");
+    liveListings = filtered.map(rowToProperty);
+    listeners.forEach((l) => l());
+    return liveListings;
+  } catch {
+    return [];
+  }
 }
 
 export function slugify(s: string) {
@@ -64,13 +97,13 @@ export function propertySlug(p: Pick<Property, "id" | "title">) {
   return `${slugify(p.title)}-${p.id}`;
 }
 export function getAllProperties(): Property[] {
-  return [...listings, ...SEED_PROPERTIES];
+  return [...liveListings, ...SEED_PROPERTIES];
 }
 export function findPropertyBySlug(slug: string): Property | undefined {
-  const m = slug.match(/-(\d+)$/);
+  const m = slug.match(/-([^-]+)$/);
   if (!m) return undefined;
-  const id = Number(m[1]);
-  return getAllProperties().find((p) => p.id === id);
+  const id = m[1];
+  return getAllProperties().find((p) => String(p.id) === id);
 }
 
 export const PACKAGES = [
@@ -85,3 +118,7 @@ export function formatPKR(n: number, intent: Intent): string {
   if (n >= 100000) return `PKR ${(n / 100000).toFixed(2)} Lac`;
   return `PKR ${n.toLocaleString("en-PK")}`;
 }
+
+// Backwards-compat shim (replaced in-memory listings store).
+export function getListings(): Property[] { return liveListings; }
+export function addListing(_p: Omit<Property, "id">) { /* now persisted via supabase in /list */ }

@@ -1,7 +1,15 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { AuthModal } from "@/components/auth-modal";
+import { useAuth } from "@/lib/use-auth";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { User as UserIcon, LogOut, List } from "lucide-react";
 
 export function Header() {
+  const [authOpen, setAuthOpen] = useState(false);
+  const { user, realtor, signOut } = useAuth();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
@@ -21,12 +29,29 @@ export function Header() {
           <Link to="/contact" className="text-muted-foreground hover:text-navy">Contact</Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="hidden text-sm md:inline-flex">Sign in</Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="hidden gap-2 text-sm md:inline-flex">
+                  <UserIcon className="h-4 w-4" />
+                  {realtor?.full_name ?? user.email?.split("@")[0]}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild><Link to="/list"><List className="mr-2 h-4 w-4" /> My Listings</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" className="hidden text-sm md:inline-flex" onClick={() => setAuthOpen(true)}>Sign in</Button>
+          )}
           <Link to="/list">
             <Button className="bg-navy text-navy-foreground hover:bg-navy/90">List property</Button>
           </Link>
         </div>
       </div>
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </header>
   );
 }
