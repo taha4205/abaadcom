@@ -38,6 +38,107 @@ export type Database = {
         }
         Relationships: []
       }
+      listings: {
+        Row: {
+          area: string
+          baths: number
+          beds: number
+          category: string
+          created_at: string
+          id: string
+          image_url: string | null
+          intent: string
+          is_active: boolean
+          price_num: number
+          price_text: string
+          realtor_id: string
+          size_sqyd: number
+          tier: string
+          title: string
+          verified: boolean
+          whatsapp_number: string | null
+        }
+        Insert: {
+          area: string
+          baths?: number
+          beds?: number
+          category: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          intent: string
+          is_active?: boolean
+          price_num: number
+          price_text: string
+          realtor_id: string
+          size_sqyd?: number
+          tier: string
+          title: string
+          verified?: boolean
+          whatsapp_number?: string | null
+        }
+        Update: {
+          area?: string
+          baths?: number
+          beds?: number
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          intent?: string
+          is_active?: boolean
+          price_num?: number
+          price_text?: string
+          realtor_id?: string
+          size_sqyd?: number
+          tier?: string
+          title?: string
+          verified?: boolean
+          whatsapp_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_realtor_id_fkey"
+            columns: ["realtor_id"]
+            isOneToOne: false
+            referencedRelation: "realtors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realtors: {
+        Row: {
+          agency_name: string
+          created_at: string
+          full_name: string
+          id: string
+          package_tier: string
+          phone: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          agency_name: string
+          created_at?: string
+          full_name: string
+          id?: string
+          package_tier: string
+          phone: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          agency_name?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          package_tier?: string
+          phone?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
