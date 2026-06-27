@@ -171,6 +171,8 @@ function Index() {
           </div>
         </section>
 
+        <HowItWorks />
+
         {/* Featured realtor ads */}
         <section className="mx-auto mt-16 max-w-6xl px-4 sm:mt-20 sm:px-6">
           <div className="mb-6 flex items-end justify-between gap-4">
