@@ -115,7 +115,7 @@ export type Database = {
           package_tier: string
           phone: string
           status: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           agency_name: string
@@ -125,7 +125,7 @@ export type Database = {
           package_tier: string
           phone: string
           status?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           agency_name?: string
@@ -135,7 +135,7 @@ export type Database = {
           package_tier?: string
           phone?: string
           status?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
