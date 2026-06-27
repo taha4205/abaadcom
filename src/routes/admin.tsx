@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PACKAGES } from "@/lib/properties";
 import {
-  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing,
+  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -170,6 +170,9 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
               activeListings={listings.filter((l) => l.is_active).length}
               pending={pending.length}
               revenue={revenue}
+              sahil={realtors.find((r) => r.id === "11111111-1111-1111-1111-111111111111")}
+              creds={creds}
+              onSeeded={reload}
             />
           ) : section === "realtors" ? (
             <RealtorsTable rows={realtors} onSetStatus={setStatus} />
@@ -184,7 +187,24 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
   );
 }
 
-function Overview({ totalRealtors, activeListings, pending, revenue }: { totalRealtors: number; activeListings: number; pending: number; revenue: number }) {
+function Overview({ totalRealtors, activeListings, pending, revenue, sahil, creds, onSeeded }: { totalRealtors: number; activeListings: number; pending: number; revenue: number; sahil?: any; creds: Creds; onSeeded: () => void }) {
+  const seedSahil = useServerFn(adminSeedSahil);
+  const [seeding, setSeeding] = useState(false);
+  const showSeed = sahil && !sahil.user_id;
+
+  async function runSeed() {
+    setSeeding(true);
+    try {
+      const r = await seedSahil({ data: creds });
+      toast.success("Sahil account ready", { description: `Login: ${r.email} / sahil1234` });
+      onSeeded();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Seed failed");
+    } finally {
+      setSeeding(false);
+    }
+  }
+
   const cards = [
     { label: "Total Realtors", value: totalRealtors },
     { label: "Active Listings", value: activeListings },
@@ -192,13 +212,24 @@ function Overview({ totalRealtors, activeListings, pending, revenue }: { totalRe
     { label: "Total Revenue (PKR)", value: revenue.toLocaleString("en-PK") },
   ];
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((c) => (
-        <div key={c.label} className="rounded-xl border border-border bg-card p-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{c.label}</p>
-          <p className="mt-3 font-display text-3xl font-medium text-navy">{c.value}</p>
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((c) => (
+          <div key={c.label} className="rounded-xl border border-border bg-card p-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{c.label}</p>
+            <p className="mt-3 font-display text-3xl font-medium text-navy">{c.value}</p>
+          </div>
+        ))}
+      </div>
+      {showSeed && (
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="font-display text-lg">Seed Sahil Real Estate Account</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Creates the auth login for the Sahil Real Estate realtor (sahil@sahilrealestate.com / sahil1234) and links it to the existing realtor record.</p>
+          <Button onClick={runSeed} disabled={seeding} className="mt-4 bg-green text-green-foreground hover:bg-green/90">
+            {seeding && <Loader2 className="h-4 w-4 animate-spin" />} Seed Sahil Real Estate Account
+          </Button>
         </div>
-      ))}
+      )}
     </div>
   );
 }

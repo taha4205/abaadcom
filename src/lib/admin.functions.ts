@@ -64,3 +64,34 @@ export const adminUpdateListing = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const adminSeedSahil = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => Creds.parse(d))
+  .handler(async ({ data }) => {
+    checkAuth(data.email, data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const REALTOR_ID = "11111111-1111-1111-1111-111111111111";
+    const EMAIL = "sahil@sahilrealestate.com";
+    const PASSWORD = "sahil1234";
+
+    // Find or create the auth user.
+    let userId: string | null = null;
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers();
+    const existing = list?.users.find((u) => u.email?.toLowerCase() === EMAIL);
+    if (existing) {
+      userId = existing.id;
+    } else {
+      const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+        email: EMAIL, password: PASSWORD, email_confirm: true,
+      });
+      if (error || !created.user) throw new Error(error?.message ?? "Failed to create user");
+      userId = created.user.id;
+    }
+
+    const { error: linkErr } = await supabaseAdmin
+      .from("realtors")
+      .update({ user_id: userId })
+      .eq("id", REALTOR_ID);
+    if (linkErr) throw new Error(linkErr.message);
+    return { ok: true, email: EMAIL };
+  });

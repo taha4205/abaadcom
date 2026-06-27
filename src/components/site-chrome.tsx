@@ -38,7 +38,7 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild><Link to="/list"><List className="mr-2 h-4 w-4" /> My Listings</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/my-listings"><List className="mr-2 h-4 w-4" /> My Listings</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
