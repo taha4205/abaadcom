@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Header, Footer } from "@/components/site-chrome";
 import { PropertyCard } from "@/components/property-card";
+import { HowItWorks } from "@/components/how-it-works";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
   type Intent, type Category,
@@ -169,6 +170,8 @@ function Index() {
             </div>
           </div>
         </section>
+
+        <HowItWorks />
 
         {/* Featured realtor ads */}
         <section className="mx-auto mt-16 max-w-6xl px-4 sm:mt-20 sm:px-6">
