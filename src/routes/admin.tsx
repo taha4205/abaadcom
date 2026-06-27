@@ -170,6 +170,9 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
               activeListings={listings.filter((l) => l.is_active).length}
               pending={pending.length}
               revenue={revenue}
+              sahil={realtors.find((r) => r.id === "11111111-1111-1111-1111-111111111111")}
+              creds={creds}
+              onSeeded={reload}
             />
           ) : section === "realtors" ? (
             <RealtorsTable rows={realtors} onSetStatus={setStatus} />
