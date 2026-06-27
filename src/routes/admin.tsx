@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PACKAGES } from "@/lib/properties";
 import {
-  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing,
+  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
