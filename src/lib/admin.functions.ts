@@ -36,12 +36,19 @@ export const adminFetchAll = createServerFn({ method: "POST" })
 
 export const adminUpdateRealtor = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    Creds.extend({ id: z.string(), status: z.enum(["approved", "rejected", "pending"]) }).parse(d),
+    Creds.extend({
+      id: z.string(),
+      status: z.enum(["approved", "rejected", "pending"]).optional(),
+      response_time: z.enum(["under_1h", "same_day", "within_24h"]).optional(),
+    }).parse(d),
   )
   .handler(async ({ data }) => {
     checkAuth(data.email, data.password);
+    const patch: { status?: string; response_time?: string } = {};
+    if (data.status) patch.status = data.status;
+    if (data.response_time) patch.response_time = data.response_time;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("realtors").update({ status: data.status }).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("realtors").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -17,9 +17,11 @@ export type Property = {
   featured: boolean;
   realtor: string;
   image: string;
-  tier?: "Silver" | "Gold" | "Platinum";
+  tier?: string;
   verified?: boolean;
   whatsapp?: string;
+  responseTime?: string;
+  realtorPhone?: string;
 };
 
 export const KARACHI_AREAS = [
@@ -76,12 +78,16 @@ export async function fetchLiveListings(): Promise<Property[]> {
   try {
     const { data, error } = await supabase
       .from("listings")
-      .select("*, realtor:realtors!inner(agency_name, status)")
+      .select("*, realtor:realtors!inner(agency_name, status, response_time, phone)")
       .eq("is_active", true)
       .order("created_at", { ascending: false });
     if (error || !data) return [];
     const filtered = data.filter((r: any) => r.realtor?.status === "approved");
-    liveListings = filtered.map(rowToProperty);
+    liveListings = filtered.map((row: any) => ({
+      ...rowToProperty(row),
+      responseTime: row.realtor?.response_time ?? undefined,
+      realtorPhone: row.realtor?.phone ?? undefined,
+    }));
     listeners.forEach((l) => l());
     return liveListings;
   } catch {
