@@ -166,6 +166,8 @@ function Index() {
                 </div>
               )}
 
+              <MoreFilters value={extra} onChange={setExtra} />
+
               <div className="md:col-span-12">
                 <Button onClick={() => setSubmitted(true)} className="h-12 w-full bg-navy text-navy-foreground hover:bg-navy/90 md:w-auto md:px-10">
                   <Search className="mr-2 h-4 w-4" /> Search properties
@@ -176,6 +178,7 @@ function Index() {
         </section>
 
         <HowItWorks />
+        <TopRealtors />
 
         {/* Featured realtor ads */}
         <section className="mx-auto mt-16 max-w-6xl px-4 sm:mt-20 sm:px-6">
