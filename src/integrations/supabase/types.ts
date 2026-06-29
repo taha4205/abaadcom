@@ -114,6 +114,7 @@ export type Database = {
           id: string
           package_tier: string
           phone: string
+          response_time: string
           status: string
           user_id: string | null
         }
@@ -124,6 +125,7 @@ export type Database = {
           id?: string
           package_tier: string
           phone: string
+          response_time?: string
           status?: string
           user_id?: string | null
         }
@@ -134,6 +136,7 @@ export type Database = {
           id?: string
           package_tier?: string
           phone?: string
+          response_time?: string
           status?: string
           user_id?: string | null
         }

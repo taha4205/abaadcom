@@ -1,0 +1,2 @@
+ALTER TABLE public.realtors ADD COLUMN IF NOT EXISTS response_time text NOT NULL DEFAULT 'within_24h';
+UPDATE public.realtors SET response_time = 'under_1h' WHERE id = '11111111-1111-1111-1111-111111111111';
