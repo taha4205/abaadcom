@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Header, Footer } from "@/components/site-chrome";
 import { PropertyCard } from "@/components/property-card";
+import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
   type Category,
@@ -47,6 +48,7 @@ function RentPage() {
   const [area, setArea] = useState("Any area");
   const [keyword, setKeyword] = useState("");
   const [budget, setBudget] = useState<[number, number]>([30000, 300000]);
+  const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [submitted, setSubmitted] = useState(false);
   const userListings = useListings();
 
@@ -57,16 +59,17 @@ function RentPage() {
 
   const filtered = useMemo(() => {
     if (!submitted) return rentals;
-    return rentals.filter((p) => {
+    const base = rentals.filter((p) => {
       if (p.category !== category) return false;
       if (area !== "Any area" && p.area !== area) return false;
       if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (p.priceNum < budget[0] || p.priceNum > budget[1]) return false;
       return true;
     });
-  }, [rentals, category, area, keyword, budget, submitted]);
+    return applyExtraFilters(base, extra);
+  }, [rentals, category, area, keyword, budget, extra, submitted]);
 
-  useEffect(() => { setSubmitted(false); }, [category, area, keyword, budget]);
+  useEffect(() => { setSubmitted(false); }, [category, area, keyword, budget, extra]);
 
   return (
     <div className="min-h-screen bg-background">
