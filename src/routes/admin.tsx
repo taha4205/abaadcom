@@ -101,6 +101,11 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
     toast.success(`Realtor ${status}`);
     reload();
   }
+  async function setResponseTime(id: string, response_time: "under_1h" | "same_day" | "within_24h") {
+    await updateRealtor({ data: { ...creds, id, response_time } });
+    setRealtors((rs) => rs.map((r) => r.id === id ? { ...r, response_time } : r));
+    toast.success("Response time updated");
+  }
   async function toggleListing(id: string, field: "verified" | "is_active", value: boolean) {
     await updateListing({ data: { ...creds, id, [field]: value } });
     setListings((ls) => ls.map((l) => l.id === id ? { ...l, [field]: value } : l));
@@ -175,11 +180,11 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
               onSeeded={reload}
             />
           ) : section === "realtors" ? (
-            <RealtorsTable rows={realtors} onSetStatus={setStatus} />
+            <RealtorsTable rows={realtors} onSetStatus={setStatus} onSetResponseTime={setResponseTime} />
           ) : section === "listings" ? (
             <ListingsTable rows={listings} onToggle={toggleListing} />
           ) : (
-            <RealtorsTable rows={pending} onSetStatus={setStatus} prominent />
+            <RealtorsTable rows={pending} onSetStatus={setStatus} onSetResponseTime={setResponseTime} prominent />
           )}
         </div>
       </main>
@@ -243,7 +248,7 @@ function StatusBadge({ status }: { status: string }) {
   return <Badge className={`${map[status] ?? ""} capitalize`}>{status}</Badge>;
 }
 
-function RealtorsTable({ rows, onSetStatus, prominent }: { rows: any[]; onSetStatus: (id: string, s: "approved" | "rejected") => void; prominent?: boolean }) {
+function RealtorsTable({ rows, onSetStatus, onSetResponseTime, prominent }: { rows: any[]; onSetStatus: (id: string, s: "approved" | "rejected") => void; onSetResponseTime: (id: string, rt: "under_1h" | "same_day" | "within_24h") => void; prominent?: boolean }) {
   if (rows.length === 0) return <p className="text-sm text-muted-foreground">No realtors.</p>;
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
@@ -254,8 +259,8 @@ function RealtorsTable({ rows, onSetStatus, prominent }: { rows: any[]; onSetSta
             <th className="px-4 py-3">Agency</th>
             <th className="px-4 py-3">Tier</th>
             <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3">Response time</th>
             <th className="px-4 py-3">Phone</th>
-            <th className="px-4 py-3">Joined</th>
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
@@ -266,8 +271,18 @@ function RealtorsTable({ rows, onSetStatus, prominent }: { rows: any[]; onSetSta
               <td className="px-4 py-3">{r.agency_name}</td>
               <td className="px-4 py-3"><Badge variant="outline">{r.package_tier}</Badge></td>
               <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+              <td className="px-4 py-3">
+                <select
+                  value={r.response_time ?? "within_24h"}
+                  onChange={(e) => onSetResponseTime(r.id, e.target.value as any)}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                >
+                  <option value="under_1h">Under 1h</option>
+                  <option value="same_day">Same day</option>
+                  <option value="within_24h">Within 24h</option>
+                </select>
+              </td>
               <td className="px-4 py-3 text-muted-foreground">{r.phone}</td>
-              <td className="px-4 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-2">
                   {r.status !== "approved" && (
