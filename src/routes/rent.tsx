@@ -159,7 +159,10 @@ function RentPage() {
                   <span className="text-sm font-medium tabular-nums">
                     {budget[0].toLocaleString("en-PK")} – {budget[1].toLocaleString("en-PK")}
                   </span>
-                </div>
+              </div>
+
+              <MoreFilters value={extra} onChange={setExtra} />
+
                 <Slider value={budget} onValueChange={(v) => setBudget([v[0], v[1]] as [number, number])} min={10000} max={1000000} step={5000} className="mt-3" />
               </div>
 
