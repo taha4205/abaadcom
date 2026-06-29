@@ -9,17 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RentRouteImport } from './routes/rent'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
+import { Route as MagazineRouteImport } from './routes/magazine'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertySlugRouteImport } from './routes/property.$slug'
+import { Route as MagazineSlugRouteImport } from './routes/magazine.$slug'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -40,6 +49,11 @@ const MyListingsRoute = MyListingsRouteImport.update({
   path: '/my-listings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MagazineRoute = MagazineRouteImport.update({
+  id: '/magazine',
+  path: '/magazine',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListRoute = ListRouteImport.update({
   id: '/list',
   path: '/list',
@@ -48,6 +62,11 @@ const ListRoute = ListRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculatorRoute = CalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -70,29 +89,42 @@ const PropertySlugRoute = PropertySlugRouteImport.update({
   path: '/property/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MagazineSlugRoute = MagazineSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MagazineRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/wishlist': typeof WishlistRoute
+  '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/wishlist': typeof WishlistRoute
+  '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
 }
 export interface FileRoutesById {
@@ -100,12 +132,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
   '/list': typeof ListRoute
+  '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/wishlist': typeof WishlistRoute
+  '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
 }
 export interface FileRouteTypes {
@@ -114,36 +150,48 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/calculator'
     | '/contact'
     | '/list'
+    | '/magazine'
     | '/my-listings'
     | '/packages'
     | '/rent'
     | '/sitemap.xml'
+    | '/wishlist'
+    | '/magazine/$slug'
     | '/property/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/admin'
+    | '/calculator'
     | '/contact'
     | '/list'
+    | '/magazine'
     | '/my-listings'
     | '/packages'
     | '/rent'
     | '/sitemap.xml'
+    | '/wishlist'
+    | '/magazine/$slug'
     | '/property/$slug'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/admin'
+    | '/calculator'
     | '/contact'
     | '/list'
+    | '/magazine'
     | '/my-listings'
     | '/packages'
     | '/rent'
     | '/sitemap.xml'
+    | '/wishlist'
+    | '/magazine/$slug'
     | '/property/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -151,17 +199,27 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  CalculatorRoute: typeof CalculatorRoute
   ContactRoute: typeof ContactRoute
   ListRoute: typeof ListRoute
+  MagazineRoute: typeof MagazineRouteWithChildren
   MyListingsRoute: typeof MyListingsRoute
   PackagesRoute: typeof PackagesRoute
   RentRoute: typeof RentRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WishlistRoute: typeof WishlistRoute
   PropertySlugRoute: typeof PropertySlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -190,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyListingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/magazine': {
+      id: '/magazine'
+      path: '/magazine'
+      fullPath: '/magazine'
+      preLoaderRoute: typeof MagazineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/list': {
       id: '/list'
       path: '/list'
@@ -202,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculator': {
+      id: '/calculator'
+      path: '/calculator'
+      fullPath: '/calculator'
+      preLoaderRoute: typeof CalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -232,19 +304,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/magazine/$slug': {
+      id: '/magazine/$slug'
+      path: '/$slug'
+      fullPath: '/magazine/$slug'
+      preLoaderRoute: typeof MagazineSlugRouteImport
+      parentRoute: typeof MagazineRoute
+    }
   }
 }
+
+interface MagazineRouteChildren {
+  MagazineSlugRoute: typeof MagazineSlugRoute
+}
+
+const MagazineRouteChildren: MagazineRouteChildren = {
+  MagazineSlugRoute: MagazineSlugRoute,
+}
+
+const MagazineRouteWithChildren = MagazineRoute._addFileChildren(
+  MagazineRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  CalculatorRoute: CalculatorRoute,
   ContactRoute: ContactRoute,
   ListRoute: ListRoute,
+  MagazineRoute: MagazineRouteWithChildren,
   MyListingsRoute: MyListingsRoute,
   PackagesRoute: PackagesRoute,
   RentRoute: RentRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WishlistRoute: WishlistRoute,
   PropertySlugRoute: PropertySlugRoute,
 }
 export const routeTree = rootRouteImport
