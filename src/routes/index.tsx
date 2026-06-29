@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Header, Footer } from "@/components/site-chrome";
 import { PropertyCard } from "@/components/property-card";
 import { HowItWorks } from "@/components/how-it-works";
+import { TopRealtors } from "@/components/top-realtors";
+import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
   type Intent, type Category,
@@ -50,6 +52,7 @@ function Index() {
   const [area, setArea] = useState("Any area");
   const [keyword, setKeyword] = useState("");
   const [plotSize, setPlotSize] = useState<[number, number]>([120, 1000]);
+  const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [submitted, setSubmitted] = useState(false);
   const userListings = useListings();
 
@@ -57,7 +60,7 @@ function Index() {
 
   const filtered = useMemo(() => {
     if (!submitted) return allProperties;
-    return allProperties.filter((p) => {
+    const base = allProperties.filter((p) => {
       if (p.intent !== intent) return false;
       if (p.category !== category) return false;
       if (area !== "Any area" && p.area !== area) return false;
@@ -65,10 +68,11 @@ function Index() {
       if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
       return true;
     });
-  }, [allProperties, intent, category, area, keyword, plotSize, submitted]);
+    return applyExtraFilters(base, extra);
+  }, [allProperties, intent, category, area, keyword, plotSize, extra, submitted]);
 
   // reset submission when filters change
-  useEffect(() => { setSubmitted(false); }, [intent, category, area, keyword, plotSize]);
+  useEffect(() => { setSubmitted(false); }, [intent, category, area, keyword, plotSize, extra]);
 
   return (
     <div className="min-h-screen bg-background">
