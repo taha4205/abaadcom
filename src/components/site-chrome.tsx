@@ -28,6 +28,7 @@ export function Header() {
         <nav className="hidden items-center gap-6 text-sm md:flex">
           <Link to="/" className="text-muted-foreground hover:text-navy">Buy</Link>
           <Link to="/rent" className="text-muted-foreground hover:text-navy">Rent</Link>
+          <Link to="/realtors" className="text-muted-foreground hover:text-navy">Realtors</Link>
           <Link to="/magazine" className="text-muted-foreground hover:text-navy">Magazine</Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
