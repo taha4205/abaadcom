@@ -52,7 +52,7 @@ export function TopRealtors() {
           <p className="text-xs font-medium uppercase tracking-wider text-green">Top performers</p>
           <h2 className="mt-1 text-xl font-medium sm:text-2xl">Our Top Realtors</h2>
         </div>
-        <Link to="/" className="shrink-0 text-sm text-muted-foreground hover:text-foreground">View all →</Link>
+        <Link to="/realtors" className="shrink-0 text-sm text-muted-foreground hover:text-foreground">View all →</Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((r) => {
@@ -80,7 +80,7 @@ export function TopRealtors() {
                 <span className="font-medium text-foreground">{r.count}</span> active {r.count === 1 ? "listing" : "listings"}
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <Link to="/" className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium hover:bg-secondary/70">
+                <Link to="/realtors" className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium hover:bg-secondary/70">
                   View <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <a

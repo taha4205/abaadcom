@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RentRouteImport } from './routes/rent'
+import { Route as RealtorsRouteImport } from './routes/realtors'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as MagazineRouteImport } from './routes/magazine'
@@ -37,6 +38,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RentRoute = RentRouteImport.update({
   id: '/rent',
   path: '/rent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RealtorsRoute = RealtorsRouteImport.update({
+  id: '/realtors',
+  path: '/realtors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PackagesRoute = PackagesRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wishlist': typeof WishlistRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wishlist': typeof WishlistRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/wishlist': typeof WishlistRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/realtors'
     | '/rent'
     | '/sitemap.xml'
     | '/wishlist'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/realtors'
     | '/rent'
     | '/sitemap.xml'
     | '/wishlist'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/realtors'
     | '/rent'
     | '/sitemap.xml'
     | '/wishlist'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   MagazineRoute: typeof MagazineRouteWithChildren
   MyListingsRoute: typeof MyListingsRoute
   PackagesRoute: typeof PackagesRoute
+  RealtorsRoute: typeof RealtorsRoute
   RentRoute: typeof RentRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WishlistRoute: typeof WishlistRoute
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/rent'
       fullPath: '/rent'
       preLoaderRoute: typeof RentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/realtors': {
+      id: '/realtors'
+      path: '/realtors'
+      fullPath: '/realtors'
+      preLoaderRoute: typeof RealtorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/packages': {
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   MagazineRoute: MagazineRouteWithChildren,
   MyListingsRoute: MyListingsRoute,
   PackagesRoute: PackagesRoute,
+  RealtorsRoute: RealtorsRoute,
   RentRoute: RentRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WishlistRoute: WishlistRoute,
