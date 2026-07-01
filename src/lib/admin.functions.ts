@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createHash, timingSafeEqual } from "node:crypto";
 
-const ADMIN_PASSWORD = "admin123";
 const ADMIN_EMAIL = "admin@admin.com";
 
 function checkAuth(email: string, password: string) {
-  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+  const expected = process.env.ADMIN_PASSWORD ?? "admin123";
+  const a = createHash("sha256").update(String(password ?? ""), "utf8").digest();
+  const b = createHash("sha256").update(expected, "utf8").digest();
+  const emailOk = String(email ?? "").toLowerCase() === ADMIN_EMAIL;
+  const passOk = a.length === b.length && timingSafeEqual(a, b);
+  if (!emailOk || !passOk) {
     throw new Error("Invalid admin credentials");
   }
 }
