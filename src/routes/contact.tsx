@@ -54,10 +54,18 @@ const schema = z.object({
 
 function Contact() {
   const [sending, setSending] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
+    // Bot trap — silently accept and reset.
+    if (honeypot.trim() !== "") {
+      toast.success("Message sent", { description: "We'll be in touch within one business day." });
+      form.reset();
+      setHoneypot("");
+      return;
+    }
     const fd = new FormData(form);
     const parsed = schema.safeParse({
       name: fd.get("name"),
@@ -69,10 +77,15 @@ function Contact() {
       return;
     }
     setSending(true);
-    const { error } = await supabase.from("contact_messages").insert(parsed.data);
+    const { sanitizeInput } = await import("@/lib/utils");
+    const payload = {
+      name: sanitizeInput(parsed.data.name),
+      email: parsed.data.email.toLowerCase(),
+      message: sanitizeInput(parsed.data.message),
+    };
+    const { error } = await supabase.from("contact_messages").insert(payload);
     setSending(false);
     if (error) {
-      console.error(error);
       toast.error("Could not send message", { description: error.message });
       return;
     }
@@ -142,6 +155,16 @@ function Contact() {
                   <Label htmlFor="message" className="mb-1.5 block text-xs uppercase tracking-wide text-muted-foreground">Message</Label>
                   <Textarea id="message" name="message" rows={5} maxLength={2000} required />
                 </div>
+                <input
+                  type="text"
+                  name="website"
+                  autoComplete="off"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: "-10000px", width: 1, height: 1, opacity: 0 }}
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
                 <Button disabled={sending} className="h-11 w-full bg-navy text-navy-foreground hover:bg-navy/90">
                   {sending ? "Sending…" : "Send message"}
                 </Button>

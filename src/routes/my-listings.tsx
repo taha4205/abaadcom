@@ -255,6 +255,11 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
   const [aiText, setAiText] = useState<string | null>(null);
 
   async function runEstimate() {
+    const { checkRateLimit, RATE_LIMIT_MAX } = await import("@/lib/rate-limit");
+    const rl = checkRateLimit();
+    if (!rl.allowed) {
+      return toast.error(`You've used your ${RATE_LIMIT_MAX} free price estimates for this hour. Try again later.`);
+    }
     setAiBusy(true); setAiText(null);
     try {
       const r = await estimate({ data: { area: s.area, category: s.category, intent: s.intent, size: s.size, beds: s.beds, baths: s.baths } });

@@ -20,6 +20,8 @@ import {
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { estimatePrice } from "@/lib/price-estimator.functions";
+import { checkRateLimit, RATE_LIMIT_MAX } from "@/lib/rate-limit";
+import { sanitizeInput, sanitizeNumber } from "@/lib/utils";
 
 export const Route = createFileRoute("/list")({
   head: () => ({
@@ -102,6 +104,10 @@ function ListingForm({ realtorId, tier }: { realtorId: string; tier: "Silver" | 
   }, [realtorId, busy]);
 
   async function runEstimate() {
+    const rl = checkRateLimit();
+    if (!rl.allowed) {
+      return toast.error(`You've used your ${RATE_LIMIT_MAX} free price estimates for this hour. Try again later.`);
+    }
     setAiBusy(true);
     setAiText(null);
     try {
@@ -116,14 +122,21 @@ function ListingForm({ realtorId, tier }: { realtorId: string; tier: "Silver" | 
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return toast.error("Title required");
+    const cleanTitle = sanitizeInput(title);
+    if (!cleanTitle) return toast.error("Title required");
     setBusy(true);
+    const cleanSize = sanitizeNumber(size);
+    const cleanPrice = sanitizeNumber(price);
+    const cleanBeds = sanitizeNumber(beds);
+    const cleanBaths = sanitizeNumber(baths);
     const { error } = await supabase.from("listings").insert({
-      realtor_id: realtorId, title, area, intent, category,
-      beds: category === "plot" ? 0 : beds,
-      baths: category === "plot" ? 0 : baths,
-      size_sqyd: size, price_num: price, price_text: formatPKR(price, intent),
-      tier, whatsapp_number: whatsapp || null, image_url: imageUrl || null,
+      realtor_id: realtorId, title: cleanTitle, area, intent, category,
+      beds: category === "plot" ? 0 : cleanBeds,
+      baths: category === "plot" ? 0 : cleanBaths,
+      size_sqyd: cleanSize, price_num: cleanPrice, price_text: formatPKR(cleanPrice, intent),
+      tier,
+      whatsapp_number: whatsapp ? sanitizeInput(whatsapp) : null,
+      image_url: imageUrl ? imageUrl.trim() : null,
     });
     setBusy(false);
     if (error) return toast.error(error.message);
