@@ -164,7 +164,7 @@ function Contact() {
                   style={{ position: "absolute", left: "-10000px", width: 1, height: 1, opacity: 0 }}
                   value={honeypot}
                   onChange={(e) => setHoneypot(e.target.value)}
-                </div>
+                />
                 <Button disabled={sending} className="h-11 w-full bg-navy text-navy-foreground hover:bg-navy/90">
                   {sending ? "Sending…" : "Send message"}
                 </Button>
