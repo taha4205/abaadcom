@@ -19,20 +19,71 @@ export const Route = createFileRoute("/admin")({
 });
 
 const STORAGE_KEY = "abaad_admin";
+const SESSION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 type Creds = { email: string; password: string };
+type Session = { token: string; expires: number; email: string; password: string };
 type Section = "overview" | "realtors" | "listings" | "requests";
 
+function loadSession(): Session | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as Session;
+    if (!s?.token || !s?.expires || s.expires <= Date.now()) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return s;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+}
+
 function AdminPage() {
-  const [creds, setCreds] = useState<Creds | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-    if (raw) try { setCreds(JSON.parse(raw)); } catch {}
+    setSession(loadSession());
+    setReady(true);
   }, []);
 
-  if (!creds) return <LoginScreen onSuccess={(c) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); setCreds(c); }} />;
-  return <Dashboard creds={creds} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setCreds(null); }} />;
+  // Auto-expiry watcher
+  useEffect(() => {
+    if (!session) return;
+    const remaining = session.expires - Date.now();
+    if (remaining <= 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession(null);
+      toast.error("Session expired. Please log in again.");
+      return;
+    }
+    const t = setTimeout(() => {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession(null);
+      toast.error("Session expired. Please log in again.");
+    }, remaining);
+    return () => clearTimeout(t);
+  }, [session]);
+
+  if (!ready) return null;
+  if (!session) {
+    return <LoginScreen onSuccess={(c) => {
+      const s: Session = {
+        token: crypto.randomUUID(),
+        expires: Date.now() + SESSION_MS,
+        email: c.email,
+        password: c.password,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      setSession(s);
+    }} />;
+  }
+  const creds: Creds = { email: session.email, password: session.password };
+  return <Dashboard creds={creds} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setSession(null); }} />;
 }
 
 function LoginScreen({ onSuccess }: { onSuccess: (c: Creds) => void }) {
