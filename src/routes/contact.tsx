@@ -155,6 +155,16 @@ function Contact() {
                   <Label htmlFor="message" className="mb-1.5 block text-xs uppercase tracking-wide text-muted-foreground">Message</Label>
                   <Textarea id="message" name="message" rows={5} maxLength={2000} required />
                 </div>
+                <input
+                  type="text"
+                  name="website"
+                  autoComplete="off"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: "-10000px", width: 1, height: 1, opacity: 0 }}
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                </div>
                 <Button disabled={sending} className="h-11 w-full bg-navy text-navy-foreground hover:bg-navy/90">
                   {sending ? "Sending…" : "Send message"}
                 </Button>
