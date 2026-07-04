@@ -72,9 +72,20 @@ function SignIn({ onDone }: { onDone: () => void }) {
 function SignUp({ onDone }: { onDone: () => void }) {
   const [form, setForm] = useState({
     email: "", password: "", full_name: "", phone: "", agency_name: "",
+    account_type: "realtor" as AccountType,
     package_tier: "Starter" as PackageTier,
   });
   const [busy, setBusy] = useState(false);
+
+  const tiers = form.account_type === "agency" ? AGENCY_TIERS : REALTOR_TIERS;
+
+  function setAccountType(t: AccountType) {
+    setForm((p) => ({
+      ...p,
+      account_type: t,
+      package_tier: (t === "agency" ? AGENCY_TIERS[0].value : REALTOR_TIERS[0].value),
+    }));
+  }
 
   function up<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((p) => ({ ...p, [k]: v }));
