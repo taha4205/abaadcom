@@ -108,6 +108,7 @@ export type Database = {
       }
       realtors: {
         Row: {
+          account_type: string
           agency_name: string
           created_at: string
           full_name: string
@@ -119,6 +120,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          account_type?: string
           agency_name: string
           created_at?: string
           full_name: string
@@ -130,6 +132,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          account_type?: string
           agency_name?: string
           created_at?: string
           full_name?: string

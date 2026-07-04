@@ -9,7 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-type PackageTier = "Starter" | "Growth" | "Pro";
+type PackageTier = "Starter" | "Growth" | "Pro" | "Silver" | "Gold" | "Platinum";
+type AccountType = "realtor" | "agency";
+
+const REALTOR_TIERS: { value: PackageTier; label: string }[] = [
+  { value: "Starter", label: "Starter — PKR 10,000 (3 listings)" },
+  { value: "Growth", label: "Growth — PKR 25,000 (5 listings)" },
+  { value: "Pro", label: "Pro — PKR 50,000 (7 listings)" },
+];
+const AGENCY_TIERS: { value: PackageTier; label: string }[] = [
+  { value: "Silver", label: "Silver — PKR 200,000 (3 listings)" },
+  { value: "Gold", label: "Gold — PKR 500,000 (5 listings)" },
+  { value: "Platinum", label: "Platinum — PKR 1,000,000 (7 listings)" },
+];
 
 export function AuthModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
@@ -60,9 +72,20 @@ function SignIn({ onDone }: { onDone: () => void }) {
 function SignUp({ onDone }: { onDone: () => void }) {
   const [form, setForm] = useState({
     email: "", password: "", full_name: "", phone: "", agency_name: "",
+    account_type: "realtor" as AccountType,
     package_tier: "Starter" as PackageTier,
   });
   const [busy, setBusy] = useState(false);
+
+  const tiers = form.account_type === "agency" ? AGENCY_TIERS : REALTOR_TIERS;
+
+  function setAccountType(t: AccountType) {
+    setForm((p) => ({
+      ...p,
+      account_type: t,
+      package_tier: (t === "agency" ? AGENCY_TIERS[0].value : REALTOR_TIERS[0].value),
+    }));
+  }
 
   function up<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((p) => ({ ...p, [k]: v }));
@@ -98,9 +121,10 @@ function SignUp({ onDone }: { onDone: () => void }) {
       full_name: form.full_name,
       phone: form.phone,
       agency_name: form.agency_name,
+      account_type: form.account_type,
       package_tier: form.package_tier,
       status: "pending",
-    });
+    } as never);
 
     setBusy(false);
 
@@ -133,13 +157,36 @@ function SignUp({ onDone }: { onDone: () => void }) {
       </div>
       <div><Label>Agency name</Label><Input required value={form.agency_name} onChange={(e) => up("agency_name", e.target.value)} /></div>
       <div>
+        <Label>Account type</Label>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {(["realtor", "agency"] as AccountType[]).map((t) => {
+            const active = form.account_type === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setAccountType(t)}
+                className={
+                  "rounded-full border px-4 py-2 text-sm font-medium transition " +
+                  (active
+                    ? "bg-navy text-navy-foreground border-navy"
+                    : "border-navy text-navy hover:bg-navy/5")
+                }
+              >
+                {t === "realtor" ? "Individual Realtor" : "Agency"}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div>
         <Label>Package tier</Label>
         <Select value={form.package_tier} onValueChange={(v) => up("package_tier", v as PackageTier)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="Starter">Starter — PKR 10,000 (3 listings)</SelectItem>
-            <SelectItem value="Growth">Growth — PKR 25,000 (5 listings)</SelectItem>
-            <SelectItem value="Pro">Pro — PKR 50,000 (7 listings)</SelectItem>
+            {tiers.map((t) => (
+              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
