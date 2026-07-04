@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { Search, MapPin, Building2, Home, Store, TreePine } from "lucide-react";
+import { Search, MapPin, Building2, Home, Store, TreePine, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { Header, Footer } from "@/components/site-chrome";
 import { PropertyCard } from "@/components/property-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { TopRealtors } from "@/components/top-realtors";
-import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, type ExtraFilters } from "@/components/more-filters";
+import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, hasExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
   type Intent, type Category,
@@ -46,33 +46,62 @@ function useListings() {
   );
 }
 
+const DEFAULT_INTENT: Intent = "buy";
+const DEFAULT_CATEGORY: Category = "flat";
+const DEFAULT_AREA = "Any area";
+const DEFAULT_KEYWORD = "";
+const DEFAULT_PLOT_SIZE: [number, number] = [120, 1000];
+
 function Index() {
-  const [intent, setIntent] = useState<Intent>("buy");
-  const [category, setCategory] = useState<Category>("flat");
-  const [area, setArea] = useState("Any area");
-  const [keyword, setKeyword] = useState("");
-  const [plotSize, setPlotSize] = useState<[number, number]>([120, 1000]);
+  const [intent, setIntent] = useState<Intent>(DEFAULT_INTENT);
+  const [category, setCategory] = useState<Category>(DEFAULT_CATEGORY);
+  const [area, setArea] = useState(DEFAULT_AREA);
+  const [keyword, setKeyword] = useState(DEFAULT_KEYWORD);
+  const [plotSize, setPlotSize] = useState<[number, number]>(DEFAULT_PLOT_SIZE);
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
-  const [submitted, setSubmitted] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const userListings = useListings();
 
   const allProperties = useMemo(() => [...userListings, ...SEED_PROPERTIES], [userListings]);
 
+  const isDefaultFilters = useMemo(() => {
+    return (
+      intent === DEFAULT_INTENT &&
+      category === DEFAULT_CATEGORY &&
+      area === DEFAULT_AREA &&
+      keyword === DEFAULT_KEYWORD &&
+      plotSize[0] === DEFAULT_PLOT_SIZE[0] &&
+      plotSize[1] === DEFAULT_PLOT_SIZE[1] &&
+      !hasExtraFilters(extra)
+    );
+  }, [intent, category, area, keyword, plotSize, extra]);
+
+  useEffect(() => {
+    if (!isDefaultFilters) setHasSearched(true);
+  }, [isDefaultFilters]);
+
+  const resetSearch = () => {
+    setIntent(DEFAULT_INTENT);
+    setCategory(DEFAULT_CATEGORY);
+    setArea(DEFAULT_AREA);
+    setKeyword(DEFAULT_KEYWORD);
+    setPlotSize(DEFAULT_PLOT_SIZE);
+    setExtra(DEFAULT_EXTRA);
+    setHasSearched(false);
+  };
+
   const filtered = useMemo(() => {
-    if (!submitted) return allProperties;
+    if (!hasSearched) return allProperties;
     const base = allProperties.filter((p) => {
       if (p.intent !== intent) return false;
       if (p.category !== category) return false;
-      if (area !== "Any area" && p.area !== area) return false;
+      if (area !== DEFAULT_AREA && p.area !== area) return false;
       if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
       return true;
     });
     return applyExtraFilters(base, extra);
-  }, [allProperties, intent, category, area, keyword, plotSize, extra, submitted]);
-
-  // reset submission when filters change
-  useEffect(() => { setSubmitted(false); }, [intent, category, area, keyword, plotSize, extra]);
+  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,17 +197,26 @@ function Index() {
 
               <MoreFilters value={extra} onChange={setExtra} />
 
-              <div className="md:col-span-12">
-                <Button onClick={() => setSubmitted(true)} className="h-12 w-full bg-navy text-navy-foreground hover:bg-navy/90 md:w-auto md:px-10">
+              <div className="flex flex-col gap-3 md:col-span-12 md:flex-row md:items-center">
+                <Button onClick={() => setHasSearched(true)} className="h-12 w-full bg-navy text-navy-foreground hover:bg-navy/90 md:w-auto md:px-10">
                   <Search className="mr-2 h-4 w-4" /> Search properties
                 </Button>
+                {hasSearched && (
+                  <Button variant="ghost" onClick={resetSearch} className="h-12 w-full text-muted-foreground hover:text-foreground md:w-auto">
+                    <X className="mr-2 h-4 w-4" /> Reset search
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        <HowItWorks />
-        <TopRealtors />
+        {!hasSearched && (
+          <>
+            <HowItWorks />
+            <TopRealtors />
+          </>
+        )}
 
         {/* Featured realtor ads */}
         <section className="mx-auto mt-16 max-w-6xl px-4 sm:mt-20 sm:px-6">
@@ -217,7 +255,7 @@ function Index() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wider text-green">
-                {submitted ? "Search results" : "Latest listings"}
+                {hasSearched ? "Search results" : "Latest listings"}
               </p>
               <h2 className="mt-1 text-xl font-medium sm:text-2xl">
                 {filtered.length} {filtered.length === 1 ? "property" : "properties"}
@@ -236,7 +274,7 @@ function Index() {
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border py-20 text-center">
               <p className="text-muted-foreground">No properties match your filters.</p>
-              <Button variant="link" onClick={() => setSubmitted(false)} className="mt-1 text-navy">Clear filters</Button>
+              <Button variant="link" onClick={resetSearch} className="mt-1 text-navy">Clear filters</Button>
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
