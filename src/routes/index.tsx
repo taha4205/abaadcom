@@ -77,7 +77,7 @@ function Index() {
   }, [intent, category, area, keyword, plotSize, extra]);
 
   useEffect(() => {
-    setHasSearched(!isDefaultFilters);
+    if (!isDefaultFilters) setHasSearched(true);
   }, [isDefaultFilters]);
 
   const resetSearch = () => {
