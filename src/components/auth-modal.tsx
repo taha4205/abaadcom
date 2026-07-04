@@ -9,7 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-type PackageTier = "Starter" | "Growth" | "Pro";
+type PackageTier = "Starter" | "Growth" | "Pro" | "Silver" | "Gold" | "Platinum";
+type AccountType = "realtor" | "agency";
+
+const REALTOR_TIERS: { value: PackageTier; label: string }[] = [
+  { value: "Starter", label: "Starter — PKR 10,000 (3 listings)" },
+  { value: "Growth", label: "Growth — PKR 25,000 (5 listings)" },
+  { value: "Pro", label: "Pro — PKR 50,000 (7 listings)" },
+];
+const AGENCY_TIERS: { value: PackageTier; label: string }[] = [
+  { value: "Silver", label: "Silver — PKR 200,000 (3 listings)" },
+  { value: "Gold", label: "Gold — PKR 500,000 (5 listings)" },
+  { value: "Platinum", label: "Platinum — PKR 1,000,000 (7 listings)" },
+];
 
 export function AuthModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
