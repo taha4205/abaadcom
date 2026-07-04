@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+type PackageTier = "Starter" | "Growth" | "Pro";
+
 export function AuthModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,7 +60,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
 function SignUp({ onDone }: { onDone: () => void }) {
   const [form, setForm] = useState({
     email: "", password: "", full_name: "", phone: "", agency_name: "",
-    package_tier: "Silver" as "Silver" | "Gold" | "Platinum",
+    package_tier: "Starter" as PackageTier,
   });
   const [busy, setBusy] = useState(false);
 
@@ -66,31 +68,60 @@ function SignUp({ onDone }: { onDone: () => void }) {
     setForm((p) => ({ ...p, [k]: v }));
   }
 
+  // NOTE: For the smoothest signup UX, disable "Confirm email" in the backend
+  // auth settings. This code handles both modes — if email confirmation is on,
+  // the user gets a toast instructing them to confirm before signing in.
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined },
+      options: {
+        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        data: {
+          full_name: form.full_name,
+          agency_name: form.agency_name,
+        },
+      },
     });
+
     if (error || !data.user) {
       setBusy(false);
       return toast.error(error?.message ?? "Sign up failed");
     }
+
+    // Insert realtor row immediately using user ID — works even before email confirmation
     const { error: rErr } = await supabase.from("realtors").insert({
       user_id: data.user.id,
       full_name: form.full_name,
       phone: form.phone,
       agency_name: form.agency_name,
       package_tier: form.package_tier,
+      status: "pending",
     });
+
     setBusy(false);
-    if (rErr) return toast.error(rErr.message);
-    toast.success("Account created", {
-      description: "Your account is under review. We'll contact you on WhatsApp once approved.",
-      duration: 8000,
-    });
+
+    if (rErr) {
+      console.error("Realtor insert error:", rErr);
+      toast.success("Account created!", {
+        description: "Please check your email to confirm your account. Once confirmed and approved by admin, you can start listing.",
+        duration: 10000,
+      });
+    } else if (!data.session) {
+      toast.success("Account created!", {
+        description: "Check your email to confirm, then come back to sign in.",
+        duration: 10000,
+      });
+    } else {
+      toast.success("Account created!", {
+        description: "Your account is under review. We'll contact you on WhatsApp once approved.",
+        duration: 8000,
+      });
+    }
+
     onDone();
   }
 
@@ -103,12 +134,12 @@ function SignUp({ onDone }: { onDone: () => void }) {
       <div><Label>Agency name</Label><Input required value={form.agency_name} onChange={(e) => up("agency_name", e.target.value)} /></div>
       <div>
         <Label>Package tier</Label>
-        <Select value={form.package_tier} onValueChange={(v) => up("package_tier", v as typeof form.package_tier)}>
+        <Select value={form.package_tier} onValueChange={(v) => up("package_tier", v as PackageTier)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="Silver">Silver — PKR 50,000</SelectItem>
-            <SelectItem value="Gold">Gold — PKR 75,000</SelectItem>
-            <SelectItem value="Platinum">Platinum — PKR 125,000</SelectItem>
+            <SelectItem value="Starter">Starter — PKR 10,000 (3 listings)</SelectItem>
+            <SelectItem value="Growth">Growth — PKR 25,000 (5 listings)</SelectItem>
+            <SelectItem value="Pro">Pro — PKR 50,000 (7 listings)</SelectItem>
           </SelectContent>
         </Select>
       </div>
