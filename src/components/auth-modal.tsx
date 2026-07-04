@@ -157,13 +157,36 @@ function SignUp({ onDone }: { onDone: () => void }) {
       </div>
       <div><Label>Agency name</Label><Input required value={form.agency_name} onChange={(e) => up("agency_name", e.target.value)} /></div>
       <div>
+        <Label>Account type</Label>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {(["realtor", "agency"] as AccountType[]).map((t) => {
+            const active = form.account_type === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setAccountType(t)}
+                className={
+                  "rounded-full border px-4 py-2 text-sm font-medium transition " +
+                  (active
+                    ? "bg-navy text-navy-foreground border-navy"
+                    : "border-navy text-navy hover:bg-navy/5")
+                }
+              >
+                {t === "realtor" ? "Individual Realtor" : "Agency"}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div>
         <Label>Package tier</Label>
         <Select value={form.package_tier} onValueChange={(v) => up("package_tier", v as PackageTier)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="Starter">Starter — PKR 10,000 (3 listings)</SelectItem>
-            <SelectItem value="Growth">Growth — PKR 25,000 (5 listings)</SelectItem>
-            <SelectItem value="Pro">Pro — PKR 50,000 (7 listings)</SelectItem>
+            {tiers.map((t) => (
+              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
