@@ -121,9 +121,10 @@ function SignUp({ onDone }: { onDone: () => void }) {
       full_name: form.full_name,
       phone: form.phone,
       agency_name: form.agency_name,
+      account_type: form.account_type,
       package_tier: form.package_tier,
       status: "pending",
-    });
+    } as never);
 
     setBusy(false);
 
