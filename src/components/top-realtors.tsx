@@ -80,7 +80,7 @@ export function TopRealtors() {
                 <span className="font-medium text-foreground">{r.count}</span> active {r.count === 1 ? "listing" : "listings"}
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <Link to="/realtors" className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium hover:bg-secondary/70">
+                <Link to="/realtor/$id" params={{ id: r.id }} className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium hover:bg-secondary/70">
                   View <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <a
