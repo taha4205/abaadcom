@@ -13,6 +13,8 @@ import {
 } from "@/lib/properties";
 import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
+import { logLead } from "@/lib/leads";
+import { ReviewSection } from "@/components/review-section";
 
 export const Route = createFileRoute("/property/$slug")({
   loader: ({ params }) => {
