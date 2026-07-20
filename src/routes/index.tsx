@@ -263,7 +263,7 @@ function Index() {
                 {filtered.length} {filtered.length === 1 ? "property" : "properties"}
               </h2>
             </div>
-            <Select defaultValue="newest">
+            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
               <SelectTrigger className="w-36 shrink-0 sm:w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest first</SelectItem>
