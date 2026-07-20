@@ -16,7 +16,7 @@ import { TopRealtors } from "@/components/top-realtors";
 import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, hasExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
-  type Intent, type Category,
+  sortProperties, type Intent, type Category, type SortKey,
 } from "@/lib/properties";
 
 export const Route = createFileRoute("/")({
