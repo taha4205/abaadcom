@@ -171,6 +171,7 @@ function PropertyPage() {
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => logLead({ listingId: p.id, realtorId: p.realtorId })}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-green px-3 py-2.5 text-sm font-medium text-green-foreground hover:bg-green/90"
               >
                 <MessageCircle className="h-4 w-4" /> Contact on WhatsApp
