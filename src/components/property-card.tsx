@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { propertySlug, type Property } from "@/lib/properties";
 import { useWishlist } from "@/lib/wishlist";
+import { logLead } from "@/lib/leads";
 
 export function PropertyCard({ p }: { p: Property }) {
   const wa = p.whatsapp ?? "923001234567";
@@ -35,6 +36,11 @@ export function PropertyCard({ p }: { p: Property }) {
             {p.tier && (
               <Badge className="absolute left-3 bottom-3 border-0 bg-navy text-navy-foreground">{p.tier}</Badge>
             )}
+            {p.images && p.images.length > 1 && (
+              <div className="absolute right-3 bottom-3 rounded-md bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
+                +{p.images.length - 1} photos
+              </div>
+            )}
             <div className="absolute right-12 top-3 rounded-md bg-white/95 px-2.5 py-1 text-xs font-medium text-navy backdrop-blur">
               {p.intent === "buy" ? "For Sale" : "For Rent"}
             </div>
@@ -64,7 +70,21 @@ export function PropertyCard({ p }: { p: Property }) {
               <Maximize className="h-3.5 w-3.5" /> {p.size} {p.category === "plot" ? "sq yd" : "sq ft"}
             </span>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">by <span className="text-foreground font-medium">{p.realtor}</span></p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            by{" "}
+            {p.realtorId ? (
+              <Link
+                to="/realtor/$id"
+                params={{ id: p.realtorId }}
+                onClick={(e) => e.stopPropagation()}
+                className="text-foreground font-medium hover:text-navy"
+              >
+                {p.realtor}
+              </Link>
+            ) : (
+              <span className="text-foreground font-medium">{p.realtor}</span>
+            )}
+          </p>
         </div>
       </Link>
       <div className="px-5 pb-5">
@@ -72,6 +92,7 @@ export function PropertyCard({ p }: { p: Property }) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => logLead({ listingId: p.id, realtorId: p.realtorId })}
           className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-green/40 bg-green/5 px-3 py-2 text-sm font-medium text-green transition hover:bg-green/10"
         >
           <MessageCircle className="h-4 w-4" /> WhatsApp Realtor

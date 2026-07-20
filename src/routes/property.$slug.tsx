@@ -13,6 +13,8 @@ import {
 } from "@/lib/properties";
 import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
+import { logLead } from "@/lib/leads";
+import { ReviewSection } from "@/components/review-section";
 
 export const Route = createFileRoute("/property/$slug")({
   loader: ({ params }) => {
@@ -169,6 +171,7 @@ function PropertyPage() {
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => logLead({ listingId: p.id, realtorId: p.realtorId })}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-green px-3 py-2.5 text-sm font-medium text-green-foreground hover:bg-green/90"
               >
                 <MessageCircle className="h-4 w-4" /> Contact on WhatsApp
@@ -179,6 +182,12 @@ function PropertyPage() {
             </div>
           </aside>
         </div>
+
+        {p.realtorId && (
+          <div className="mt-12">
+            <ReviewSection realtorId={p.realtorId} />
+          </div>
+        )}
 
         {/* Similar properties */}
         {(similar.length > 0 || allLoaded) && similar.length > 0 && (

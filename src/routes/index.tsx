@@ -16,7 +16,7 @@ import { TopRealtors } from "@/components/top-realtors";
 import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, hasExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
-  type Intent, type Category,
+  sortProperties, type Intent, type Category, type SortKey,
 } from "@/lib/properties";
 
 export const Route = createFileRoute("/")({
@@ -60,6 +60,7 @@ function Index() {
   const [plotSize, setPlotSize] = useState<[number, number]>(DEFAULT_PLOT_SIZE);
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [hasSearched, setHasSearched] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
   const userListings = useListings();
 
   const allProperties = useMemo(() => [...userListings, ...SEED_PROPERTIES], [userListings]);
@@ -91,17 +92,18 @@ function Index() {
   };
 
   const filtered = useMemo(() => {
-    if (!hasSearched) return allProperties;
-    const base = allProperties.filter((p) => {
-      if (p.intent !== intent) return false;
-      if (p.category !== category) return false;
-      if (area !== DEFAULT_AREA && p.area !== area) return false;
-      if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
-      if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
-      return true;
-    });
-    return applyExtraFilters(base, extra);
-  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra]);
+    const base = !hasSearched
+      ? allProperties
+      : allProperties.filter((p) => {
+          if (p.intent !== intent) return false;
+          if (p.category !== category) return false;
+          if (area !== DEFAULT_AREA && p.area !== area) return false;
+          if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
+          if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
+          return true;
+        });
+    return sortProperties(applyExtraFilters(base, extra), sortKey);
+  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra, sortKey]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -261,7 +263,7 @@ function Index() {
                 {filtered.length} {filtered.length === 1 ? "property" : "properties"}
               </h2>
             </div>
-            <Select defaultValue="newest">
+            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
               <SelectTrigger className="w-36 shrink-0 sm:w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest first</SelectItem>

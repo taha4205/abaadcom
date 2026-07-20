@@ -189,10 +189,11 @@ function RealtorsPage() {
                       <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
                     </a>
                     <Link
-                      to="/"
+                      to="/realtor/$id"
+                      params={{ id: r.id }}
                       className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium hover:bg-secondary/70"
                     >
-                      Listings <ArrowRight className="h-3.5 w-3.5" />
+                      View profile <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                 </article>

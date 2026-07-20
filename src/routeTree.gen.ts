@@ -22,6 +22,7 @@ import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RealtorIdRouteImport } from './routes/realtor.$id'
 import { Route as PropertySlugRouteImport } from './routes/property.$slug'
 import { Route as MagazineSlugRouteImport } from './routes/magazine.$slug'
 
@@ -90,6 +91,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RealtorIdRoute = RealtorIdRouteImport.update({
+  id: '/realtor/$id',
+  path: '/realtor/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertySlugRoute = PropertySlugRouteImport.update({
   id: '/property/$slug',
   path: '/property/$slug',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
+  '/realtor/$id': typeof RealtorIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
+  '/realtor/$id': typeof RealtorIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
+  '/realtor/$id': typeof RealtorIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/magazine/$slug'
     | '/property/$slug'
+    | '/realtor/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/magazine/$slug'
     | '/property/$slug'
+    | '/realtor/$id'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/magazine/$slug'
     | '/property/$slug'
+    | '/realtor/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WishlistRoute: typeof WishlistRoute
   PropertySlugRoute: typeof PropertySlugRoute
+  RealtorIdRoute: typeof RealtorIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -317,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/realtor/$id': {
+      id: '/realtor/$id'
+      path: '/realtor/$id'
+      fullPath: '/realtor/$id'
+      preLoaderRoute: typeof RealtorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/property/$slug': {
       id: '/property/$slug'
       path: '/property/$slug'
@@ -361,17 +381,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WishlistRoute: WishlistRoute,
   PropertySlugRoute: PropertySlugRoute,
+  RealtorIdRoute: RealtorIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
