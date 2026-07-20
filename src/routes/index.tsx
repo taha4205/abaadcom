@@ -60,6 +60,7 @@ function Index() {
   const [plotSize, setPlotSize] = useState<[number, number]>(DEFAULT_PLOT_SIZE);
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [hasSearched, setHasSearched] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
   const userListings = useListings();
 
   const allProperties = useMemo(() => [...userListings, ...SEED_PROPERTIES], [userListings]);
