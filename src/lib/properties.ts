@@ -16,12 +16,17 @@ export type Property = {
   size: number;
   featured: boolean;
   realtor: string;
+  realtorId?: string;
   image: string;
+  images?: string[];
+  lat?: number | null;
+  lng?: number | null;
   tier?: string;
   verified?: boolean;
   whatsapp?: string;
   responseTime?: string;
   realtorPhone?: string;
+  createdAt?: string;
 };
 
 export const KARACHI_AREAS = [
@@ -31,8 +36,34 @@ export const KARACHI_AREAS = [
   "North Nazimabad", "Bahria Town Karachi", "Malir", "Korangi", "Saddar", "Tariq Road",
 ];
 
+// Rough centroid for each Karachi area (used when a listing has no explicit lat/lng).
+export const AREA_COORDS: Record<string, [number, number]> = {
+  "DHA Phase 1": [24.8025, 67.0356],
+  "DHA Phase 2": [24.8103, 67.0473],
+  "DHA Phase 5": [24.8003, 67.0740],
+  "DHA Phase 6": [24.8083, 67.0798],
+  "DHA Phase 8": [24.7963, 67.0975],
+  "Clifton": [24.8138, 67.0300],
+  "Bahadurabad": [24.8779, 67.0685],
+  "PECHS": [24.8724, 67.0669],
+  "Gulshan-e-Iqbal": [24.9209, 67.0904],
+  "Gulistan-e-Johar": [24.9084, 67.1345],
+  "North Nazimabad": [24.9412, 67.0350],
+  "Bahria Town Karachi": [25.0004, 67.3220],
+  "Malir": [24.8938, 67.2076],
+  "Korangi": [24.8378, 67.1481],
+  "Saddar": [24.8607, 67.0184],
+  "Tariq Road": [24.8712, 67.0685],
+  "University Road": [24.9271, 67.1145],
+};
+
+function coordsFor(area: string, lat?: number | null, lng?: number | null): [number, number] | null {
+  if (typeof lat === "number" && typeof lng === "number") return [lat, lng];
+  const key = Object.keys(AREA_COORDS).find((k) => area.startsWith(k));
+  return key ? AREA_COORDS[key] : null;
+}
+
 const U = (id: string) => `https://images.unsplash.com/${id}?w=900&q=80&auto=format&fit=crop`;
-const DUMMY_WA = "923001234567";
 
 export const SEED_PROPERTIES: Property[] = [
   { id: 1, title: "Modern 3-Bed Apartment with Sea View", area: "Clifton Block 4", price: "PKR 3.2 Cr", priceNum: 32000000, intent: "buy", category: "flat", beds: 3, baths: 2, size: 200, featured: true, realtor: "Coastline Estates", image: U("photo-1545324418-cc1a3fa10c00"), tier: "Platinum", verified: true, whatsapp: "923001234567" },
@@ -45,7 +76,6 @@ export const SEED_PROPERTIES: Property[] = [
   { id: 8, title: "Spacious 5-Bed House — North Nazimabad", area: "North Nazimabad Block F", price: "PKR 3.8 Cr", priceNum: 38000000, intent: "buy", category: "house", beds: 5, baths: 4, size: 400, featured: true, realtor: "Skyline Realty", image: U("photo-1568605114967-8130f3a36994"), tier: "Gold", whatsapp: "923331234567" },
 ];
 
-// Cached live listings from supabase (merged with seed on home page).
 let liveListings: Property[] = [];
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -54,6 +84,9 @@ export function getLiveListings() { return liveListings; }
 export function subscribeListings(l: Listener) { listeners.add(l); return () => { listeners.delete(l); }; }
 
 function rowToProperty(row: any): Property {
+  const coords = coordsFor(row.area, row.lat, row.lng);
+  const images: string[] = Array.isArray(row.image_urls) ? row.image_urls.filter(Boolean) : [];
+  const primary = row.image_url || images[0] || U("photo-1568605114967-8130f3a36994");
   return {
     id: row.id,
     title: row.title,
@@ -67,10 +100,15 @@ function rowToProperty(row: any): Property {
     size: row.size_sqyd ?? 0,
     featured: row.tier === "Platinum" || row.tier === "Gold",
     realtor: row.realtor?.agency_name ?? "abaad realtor",
-    image: row.image_url || U("photo-1568605114967-8130f3a36994"),
+    realtorId: row.realtor_id,
+    image: primary,
+    images: [primary, ...images.filter((u) => u !== primary)],
+    lat: coords?.[0] ?? null,
+    lng: coords?.[1] ?? null,
     tier: row.tier,
     verified: !!row.verified,
     whatsapp: row.whatsapp_number || undefined,
+    createdAt: row.created_at,
   };
 }
 
@@ -78,13 +116,14 @@ export async function fetchLiveListings(): Promise<Property[]> {
   try {
     const { data, error } = await supabase
       .from("listings")
-      .select("*, realtor:realtors!inner(agency_name, status, response_time, phone)")
+      .select("*, realtor:realtors!inner(id, agency_name, status, response_time, phone)")
       .eq("is_active", true)
       .order("created_at", { ascending: false });
     if (error || !data) return [];
     const filtered = data.filter((r: any) => r.realtor?.status === "approved");
     liveListings = filtered.map((row: any) => ({
       ...rowToProperty(row),
+      realtorId: row.realtor?.id ?? row.realtor_id,
       responseTime: row.realtor?.response_time ?? undefined,
       realtorPhone: row.realtor?.phone ?? undefined,
     }));
@@ -111,6 +150,21 @@ export function findPropertyBySlug(slug: string): Property | undefined {
   return getAllProperties().find((p) => String(p.id) === id);
 }
 
+export type SortKey = "newest" | "low" | "high";
+export function sortProperties(list: Property[], key: SortKey): Property[] {
+  const copy = [...list];
+  if (key === "low") copy.sort((a, b) => a.priceNum - b.priceNum);
+  else if (key === "high") copy.sort((a, b) => b.priceNum - a.priceNum);
+  else copy.sort((a, b) => {
+    // Live listings (uuid) with createdAt sort first by date; seed keeps id order.
+    if (a.createdAt && b.createdAt) return b.createdAt.localeCompare(a.createdAt);
+    if (a.createdAt) return -1;
+    if (b.createdAt) return 1;
+    return Number(a.id) - Number(b.id);
+  });
+  return copy;
+}
+
 export const PACKAGES = [
   { tier: "Silver" as const, price: 50000, perks: ["1 active listing", "30-day visibility", "Standard placement"] },
   { tier: "Gold" as const, price: 75000, perks: ["3 active listings", "60-day visibility", "Featured badge", "AI listing assistant"] },
@@ -124,6 +178,21 @@ export function formatPKR(n: number, intent: Intent): string {
   return `PKR ${n.toLocaleString("en-PK")}`;
 }
 
-// Backwards-compat shim (replaced in-memory listings store).
 export function getListings(): Property[] { return liveListings; }
-export function addListing(_p: Omit<Property, "id">) { /* now persisted via supabase in /list */ }
+export function addListing(_p: Omit<Property, "id">) { /* now persisted via supabase */ }
+
+/** Uploads one file to the listing-images bucket under the caller's uid folder. */
+export async function uploadListingImage(file: File): Promise<string | null> {
+  const { data: session } = await supabase.auth.getSession();
+  const uid = session.session?.user?.id;
+  if (!uid) return null;
+  const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+  const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from("listing-images").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type,
+  });
+  if (error) return null;
+  return supabase.storage.from("listing-images").getPublicUrl(path).data.publicUrl;
+}
