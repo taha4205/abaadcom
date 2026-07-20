@@ -183,6 +183,12 @@ function PropertyPage() {
           </aside>
         </div>
 
+        {p.realtorId && (
+          <div className="mt-12">
+            <ReviewSection realtorId={p.realtorId} />
+          </div>
+        )}
+
         {/* Similar properties */}
         {(similar.length > 0 || allLoaded) && similar.length > 0 && (
           <section className="mt-16">
