@@ -92,17 +92,18 @@ function Index() {
   };
 
   const filtered = useMemo(() => {
-    if (!hasSearched) return allProperties;
-    const base = allProperties.filter((p) => {
-      if (p.intent !== intent) return false;
-      if (p.category !== category) return false;
-      if (area !== DEFAULT_AREA && p.area !== area) return false;
-      if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
-      if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
-      return true;
-    });
-    return applyExtraFilters(base, extra);
-  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra]);
+    const base = !hasSearched
+      ? allProperties
+      : allProperties.filter((p) => {
+          if (p.intent !== intent) return false;
+          if (p.category !== category) return false;
+          if (area !== DEFAULT_AREA && p.area !== area) return false;
+          if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
+          if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
+          return true;
+        });
+    return sortProperties(applyExtraFilters(base, extra), sortKey);
+  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra, sortKey]);
 
   return (
     <div className="min-h-screen bg-background">
