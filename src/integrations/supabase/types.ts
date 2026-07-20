@@ -38,6 +38,54 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          buyer_name: string | null
+          buyer_phone: string | null
+          buyer_user_id: string | null
+          channel: string
+          created_at: string
+          id: string
+          listing_id: string
+          realtor_id: string
+        }
+        Insert: {
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          buyer_user_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          realtor_id: string
+        }
+        Update: {
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          buyer_user_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          realtor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_realtor_id_fkey"
+            columns: ["realtor_id"]
+            isOneToOne: false
+            referencedRelation: "realtors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           area: string
@@ -47,8 +95,11 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          image_urls: string[]
           intent: string
           is_active: boolean
+          lat: number | null
+          lng: number | null
           price_num: number
           price_text: string
           realtor_id: string
@@ -66,8 +117,11 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           intent: string
           is_active?: boolean
+          lat?: number | null
+          lng?: number | null
           price_num: number
           price_text: string
           realtor_id: string
@@ -85,8 +139,11 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           intent?: string
           is_active?: boolean
+          lat?: number | null
+          lng?: number | null
           price_num?: number
           price_text?: string
           realtor_id?: string
@@ -99,6 +156,54 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "listings_realtor_id_fkey"
+            columns: ["realtor_id"]
+            isOneToOne: false
+            referencedRelation: "realtors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realtor_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          rating: number
+          realtor_id: string
+          reviewer_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          rating: number
+          realtor_id: string
+          reviewer_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          rating?: number
+          realtor_id?: string
+          reviewer_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realtor_reviews_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realtor_reviews_realtor_id_fkey"
             columns: ["realtor_id"]
             isOneToOne: false
             referencedRelation: "realtors"
