@@ -196,6 +196,10 @@ function Dashboard({ realtor }: { realtor: RealtorProfile }) {
             onCreated={() => { setTab("my"); reload(); }}
           />
         </TabsContent>
+
+        <TabsContent value="leads" className="mt-6">
+          <LeadsPanel realtorId={realtor.id} />
+        </TabsContent>
       </Tabs>
 
       {editing && (
