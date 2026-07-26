@@ -111,7 +111,7 @@ function EmptyCard({ Icon, title, body, cta }: { Icon: any; title: string; body:
 }
 
 function Dashboard({ realtor }: { realtor: RealtorProfile }) {
-  const [tab, setTab] = useState<"my" | "add">("my");
+  const [tab, setTab] = useState<"my" | "add" | "leads">("my");
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Listing | null>(null);
