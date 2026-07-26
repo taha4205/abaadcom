@@ -15,6 +15,9 @@ import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
 import { logLead } from "@/lib/leads";
 import { ReviewSection } from "@/components/review-section";
+import { ClientOnly } from "@/components/client-only";
+import { lazy, Suspense } from "react";
+const LeafletMap = lazy(() => import("@/components/leaflet-map"));
 
 export const Route = createFileRoute("/property/$slug")({
   loader: ({ params }) => {
