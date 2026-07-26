@@ -263,8 +263,49 @@ const CATS: { v: Category; l: string; Icon: any }[] = [
 type FormState = {
   title: string; area: string; intent: Intent; category: Category;
   beds: number; baths: number; size: number; price: number;
-  whatsapp: string; imageUrl: string;
+  whatsapp: string; imageUrl: string; imageUrls: string[];
 };
+
+function PhotoUploader({ urls, onChange }: { urls: string[]; onChange: (u: string[]) => void }) {
+  const [busy, setBusy] = useState(false);
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    const uploads = await Promise.all(Array.from(files).slice(0, 8).map((f) => uploadListingImage(f)));
+    setBusy(false);
+    const ok = uploads.filter((u): u is string => !!u);
+    if (ok.length === 0) return toast.error("Upload failed — sign in as a realtor and try again.");
+    onChange([...urls, ...ok].slice(0, 12));
+    if (ok.length < uploads.length) toast.warning(`${uploads.length - ok.length} file(s) failed to upload`);
+  }
+  return (
+    <div>
+      <Label>Photos ({urls.length}/12)</Label>
+      <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+        {urls.map((u, i) => (
+          <div key={u + i} className="relative aspect-square overflow-hidden rounded-md border border-border bg-secondary">
+            <img src={u} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(urls.filter((_, j) => j !== i))}
+              className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/95 text-navy shadow"
+              aria-label="Remove photo"
+            >
+              <XIcon className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+        {urls.length < 12 && (
+          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {busy ? "Uploading…" : "Add photos"}
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} disabled={busy} />
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) => void }) {
   const estimate = useServerFn(estimatePrice);
