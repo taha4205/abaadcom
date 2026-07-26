@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { Search, MapPin, Building2, Home, Store, TreePine, X } from "lucide-react";
+import { useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react";
+import { Search, MapPin, Building2, Home, Store, TreePine, X, LayoutGrid, Map as MapIcon } from "lucide-react";
+import { ClientOnly } from "@/components/client-only";
+const LeafletMap = lazy(() => import("@/components/leaflet-map"));
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
