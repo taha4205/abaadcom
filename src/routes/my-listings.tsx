@@ -43,8 +43,19 @@ type Listing = {
   tier: "Silver" | "Gold" | "Platinum";
   whatsapp_number: string | null;
   image_url: string | null;
+  image_urls: string[] | null;
   verified: boolean;
   is_active: boolean;
+};
+
+type LeadRow = {
+  id: string;
+  listing_id: string;
+  buyer_name: string | null;
+  buyer_phone: string | null;
+  channel: string;
+  created_at: string;
+  listings?: { title: string; area: string } | null;
 };
 
 function MyListingsPage() {
