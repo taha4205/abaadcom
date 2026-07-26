@@ -268,14 +268,32 @@ function Index() {
                 {filtered.length} {filtered.length === 1 ? "property" : "properties"}
               </h2>
             </div>
-            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-              <SelectTrigger className="w-36 shrink-0 sm:w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="low">Price: low to high</SelectItem>
-                <SelectItem value="high">Price: high to low</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="inline-flex rounded-md border border-border bg-secondary p-1">
+                <button
+                  onClick={() => setView("grid")}
+                  className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition ${view === "grid" ? "bg-card text-navy shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                  aria-label="Grid view"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" /> Grid
+                </button>
+                <button
+                  onClick={() => setView("map")}
+                  className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition ${view === "map" ? "bg-card text-navy shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                  aria-label="Map view"
+                >
+                  <MapIcon className="h-3.5 w-3.5" /> Map
+                </button>
+              </div>
+              <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+                <SelectTrigger className="w-36 shrink-0 sm:w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="low">Price: low to high</SelectItem>
+                  <SelectItem value="high">Price: high to low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {filtered.length === 0 ? (
@@ -283,6 +301,24 @@ function Index() {
               <p className="text-muted-foreground">No properties match your filters.</p>
               <Button variant="link" onClick={resetSearch} className="mt-1 text-navy">Clear filters</Button>
             </div>
+          ) : view === "map" ? (
+            <ClientOnly fallback={<div className="h-[560px] w-full rounded-xl bg-secondary" />}>
+              <Suspense fallback={<div className="h-[560px] w-full rounded-xl bg-secondary" />}>
+                <LeafletMap
+                  height={560}
+                  markers={filtered
+                    .filter((p) => typeof p.lat === "number" && typeof p.lng === "number")
+                    .map((p) => ({
+                      id: String(p.id),
+                      lat: p.lat as number,
+                      lng: p.lng as number,
+                      title: p.title,
+                      price: p.price,
+                      href: `/property/${propertySlug(p)}`,
+                    }))}
+                />
+              </Suspense>
+            </ClientOnly>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => <PropertyCard key={p.id} p={p} />)}
