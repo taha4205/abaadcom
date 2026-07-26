@@ -100,7 +100,7 @@ function PropertyPage() {
 
         {/* Hero image */}
         <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary">
-          <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
+          <img src={activeImg} alt={p.title} className="h-full w-full object-cover" />
           {p.verified && (
             <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
               <ShieldCheck className="mr-1 h-3 w-3" /> Verified
@@ -126,6 +126,22 @@ function PropertyPage() {
             </button>
           </div>
         </div>
+
+        {gallery.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {gallery.map((src, i) => (
+              <button
+                key={src + i}
+                onClick={() => setActiveImg(src)}
+                className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-md border-2 transition ${
+                  activeImg === src ? "border-navy" : "border-transparent opacity-80 hover:opacity-100"
+                }`}
+              >
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
