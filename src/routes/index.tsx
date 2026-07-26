@@ -65,6 +65,7 @@ function Index() {
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("newest");
+  const [view, setView] = useState<ViewMode>("grid");
   const userListings = useListings();
 
   const allProperties = useMemo(() => [...userListings, ...SEED_PROPERTIES], [userListings]);
