@@ -393,7 +393,7 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
 function AddListingForm({ realtor, onCreated }: { realtor: RealtorProfile; onCreated: () => void }) {
   const [s, setS] = useState<FormState>({
     title: "", area: "DHA Phase 6", intent: "buy", category: "house",
-    beds: 3, baths: 3, size: 500, price: 50000000, whatsapp: realtor.phone || "", imageUrl: "",
+    beds: 3, baths: 3, size: 500, price: 50000000, whatsapp: realtor.phone || "", imageUrl: "", imageUrls: [],
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<FormState>) => setS((prev) => ({ ...prev, ...p }));
