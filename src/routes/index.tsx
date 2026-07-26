@@ -18,8 +18,10 @@ import { TopRealtors } from "@/components/top-realtors";
 import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, hasExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
-  sortProperties, type Intent, type Category, type SortKey,
+  sortProperties, propertySlug, type Intent, type Category, type SortKey,
 } from "@/lib/properties";
+
+type ViewMode = "grid" | "map";
 
 export const Route = createFileRoute("/")({
   head: () => ({
