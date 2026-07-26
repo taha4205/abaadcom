@@ -382,8 +382,10 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div><Label>WhatsApp number</Label><Input value={s.whatsapp} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="923001234567" /></div>
-        <div><Label>Image URL</Label><Input value={s.imageUrl} onChange={(e) => set({ imageUrl: e.target.value })} placeholder="https://…" /></div>
+        <div><Label>Cover image URL (optional)</Label><Input value={s.imageUrl} onChange={(e) => set({ imageUrl: e.target.value })} placeholder="https://…" /></div>
       </div>
+
+      <PhotoUploader urls={s.imageUrls} onChange={(u) => set({ imageUrls: u })} />
     </div>
   );
 }
