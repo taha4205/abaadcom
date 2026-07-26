@@ -15,6 +15,9 @@ import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
 import { logLead } from "@/lib/leads";
 import { ReviewSection } from "@/components/review-section";
+import { ClientOnly } from "@/components/client-only";
+import { lazy, Suspense } from "react";
+const LeafletMap = lazy(() => import("@/components/leaflet-map"));
 
 export const Route = createFileRoute("/property/$slug")({
   loader: ({ params }) => {
@@ -62,6 +65,8 @@ function PropertyPage() {
   const { has, toggle } = useWishlist();
   const saved = has(p.id);
   const [allLoaded, setAllLoaded] = useState(false);
+  const gallery = (p.images && p.images.length > 0) ? p.images : [p.image];
+  const [activeImg, setActiveImg] = useState(gallery[0]);
 
   useEffect(() => { fetchLiveListings().then(() => setAllLoaded(true)); }, []);
 
@@ -95,7 +100,7 @@ function PropertyPage() {
 
         {/* Hero image */}
         <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary">
-          <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
+          <img src={activeImg} alt={p.title} className="h-full w-full object-cover" />
           {p.verified && (
             <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
               <ShieldCheck className="mr-1 h-3 w-3" /> Verified
@@ -121,6 +126,22 @@ function PropertyPage() {
             </button>
           </div>
         </div>
+
+        {gallery.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {gallery.map((src: string, i: number) => (
+              <button
+                key={src + i}
+                onClick={() => setActiveImg(src)}
+                className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-md border-2 transition ${
+                  activeImg === src ? "border-navy" : "border-transparent opacity-80 hover:opacity-100"
+                }`}
+              >
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -182,6 +203,25 @@ function PropertyPage() {
             </div>
           </aside>
         </div>
+
+        {typeof p.lat === "number" && typeof p.lng === "number" && (
+          <section className="mt-12">
+            <h2 className="font-display text-lg font-medium text-navy">Location</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Approximate location in {p.area}, Karachi.</p>
+            <div className="mt-4">
+              <ClientOnly fallback={<div className="h-[360px] w-full rounded-xl bg-secondary" />}>
+                <Suspense fallback={<div className="h-[360px] w-full rounded-xl bg-secondary" />}>
+                  <LeafletMap
+                    center={[p.lat, p.lng]}
+                    zoom={14}
+                    height={360}
+                    markers={[{ id: String(p.id), lat: p.lat, lng: p.lng, title: p.title, price: p.price }]}
+                  />
+                </Suspense>
+              </ClientOnly>
+            </div>
+          </section>
+        )}
 
         {p.realtorId && (
           <div className="mt-12">

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Loader2, LogIn, Clock, Pencil, Eye, EyeOff, RefreshCw, Plus, ShieldCheck,
   Building2, Home as HomeIcon, Store, TreePine, Sparkles, Bed, Bath, Maximize, MapPin,
+  Upload, X as XIcon, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { Header, Footer } from "@/components/site-chrome";
 import { AuthModal } from "@/components/auth-modal";
-import { KARACHI_AREAS, formatPKR, type Intent, type Category } from "@/lib/properties";
+import { KARACHI_AREAS, formatPKR, uploadListingImage, type Intent, type Category } from "@/lib/properties";
 import { useAuth, type RealtorProfile } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { estimatePrice } from "@/lib/price-estimator.functions";
@@ -42,8 +43,19 @@ type Listing = {
   tier: "Silver" | "Gold" | "Platinum";
   whatsapp_number: string | null;
   image_url: string | null;
+  image_urls: string[] | null;
   verified: boolean;
   is_active: boolean;
+};
+
+type LeadRow = {
+  id: string;
+  listing_id: string;
+  buyer_name: string | null;
+  buyer_phone: string | null;
+  channel: string;
+  created_at: string;
+  listings?: { title: string; area: string } | null;
 };
 
 function MyListingsPage() {
@@ -99,7 +111,7 @@ function EmptyCard({ Icon, title, body, cta }: { Icon: any; title: string; body:
 }
 
 function Dashboard({ realtor }: { realtor: RealtorProfile }) {
-  const [tab, setTab] = useState<"my" | "add">("my");
+  const [tab, setTab] = useState<"my" | "add" | "leads">("my");
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Listing | null>(null);
@@ -148,9 +160,10 @@ function Dashboard({ realtor }: { realtor: RealtorProfile }) {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mt-6">
-        <TabsList className="grid w-full max-w-sm grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="my">My Listings</TabsTrigger>
           <TabsTrigger value="add"><Plus className="h-3.5 w-3.5" /> Add New</TabsTrigger>
+          <TabsTrigger value="leads"><MessageCircle className="h-3.5 w-3.5" /> Leads</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my" className="mt-6">
@@ -182,6 +195,10 @@ function Dashboard({ realtor }: { realtor: RealtorProfile }) {
             realtor={realtor}
             onCreated={() => { setTab("my"); reload(); }}
           />
+        </TabsContent>
+
+        <TabsContent value="leads" className="mt-6">
+          <LeadsPanel realtorId={realtor.id} />
         </TabsContent>
       </Tabs>
 
@@ -246,8 +263,49 @@ const CATS: { v: Category; l: string; Icon: any }[] = [
 type FormState = {
   title: string; area: string; intent: Intent; category: Category;
   beds: number; baths: number; size: number; price: number;
-  whatsapp: string; imageUrl: string;
+  whatsapp: string; imageUrl: string; imageUrls: string[];
 };
+
+function PhotoUploader({ urls, onChange }: { urls: string[]; onChange: (u: string[]) => void }) {
+  const [busy, setBusy] = useState(false);
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    const uploads = await Promise.all(Array.from(files).slice(0, 8).map((f) => uploadListingImage(f)));
+    setBusy(false);
+    const ok = uploads.filter((u): u is string => !!u);
+    if (ok.length === 0) return toast.error("Upload failed — sign in as a realtor and try again.");
+    onChange([...urls, ...ok].slice(0, 12));
+    if (ok.length < uploads.length) toast.warning(`${uploads.length - ok.length} file(s) failed to upload`);
+  }
+  return (
+    <div>
+      <Label>Photos ({urls.length}/12)</Label>
+      <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+        {urls.map((u, i) => (
+          <div key={u + i} className="relative aspect-square overflow-hidden rounded-md border border-border bg-secondary">
+            <img src={u} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(urls.filter((_, j) => j !== i))}
+              className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/95 text-navy shadow"
+              aria-label="Remove photo"
+            >
+              <XIcon className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+        {urls.length < 12 && (
+          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {busy ? "Uploading…" : "Add photos"}
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} disabled={busy} />
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) => void }) {
   const estimate = useServerFn(estimatePrice);
@@ -324,8 +382,10 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div><Label>WhatsApp number</Label><Input value={s.whatsapp} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="923001234567" /></div>
-        <div><Label>Image URL</Label><Input value={s.imageUrl} onChange={(e) => set({ imageUrl: e.target.value })} placeholder="https://…" /></div>
+        <div><Label>Cover image URL (optional)</Label><Input value={s.imageUrl} onChange={(e) => set({ imageUrl: e.target.value })} placeholder="https://…" /></div>
       </div>
+
+      <PhotoUploader urls={s.imageUrls} onChange={(u) => set({ imageUrls: u })} />
     </div>
   );
 }
@@ -333,7 +393,7 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
 function AddListingForm({ realtor, onCreated }: { realtor: RealtorProfile; onCreated: () => void }) {
   const [s, setS] = useState<FormState>({
     title: "", area: "DHA Phase 6", intent: "buy", category: "house",
-    beds: 3, baths: 3, size: 500, price: 50000000, whatsapp: realtor.phone || "", imageUrl: "",
+    beds: 3, baths: 3, size: 500, price: 50000000, whatsapp: realtor.phone || "", imageUrl: "", imageUrls: [],
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<FormState>) => setS((prev) => ({ ...prev, ...p }));
@@ -349,7 +409,8 @@ function AddListingForm({ realtor, onCreated }: { realtor: RealtorProfile; onCre
       size_sqyd: s.size, price_num: s.price, price_text: formatPKR(s.price, s.intent),
       tier: realtor.package_tier,
       whatsapp_number: s.whatsapp || null,
-      image_url: s.imageUrl || null,
+      image_url: s.imageUrl || s.imageUrls[0] || null,
+      image_urls: s.imageUrls,
     });
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -372,6 +433,7 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
     title: listing.title, area: listing.area, intent: listing.intent, category: listing.category,
     beds: listing.beds, baths: listing.baths, size: listing.size_sqyd, price: listing.price_num,
     whatsapp: listing.whatsapp_number ?? "", imageUrl: listing.image_url ?? "",
+    imageUrls: listing.image_urls ?? [],
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<FormState>) => setS((prev) => ({ ...prev, ...p }));
@@ -385,7 +447,8 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
       baths: s.category === "plot" ? 0 : s.baths,
       size_sqyd: s.size, price_num: s.price, price_text: formatPKR(s.price, s.intent),
       whatsapp_number: s.whatsapp || null,
-      image_url: s.imageUrl || null,
+      image_url: s.imageUrl || s.imageUrls[0] || null,
+      image_urls: s.imageUrls,
     }).eq("id", listing.id);
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -408,5 +471,75 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LeadsPanel({ realtorId }: { realtorId: string }) {
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("leads")
+      .select("id, listing_id, buyer_name, buyer_phone, channel, created_at, listings(title, area)")
+      .eq("realtor_id", realtorId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setLeads((data as any as LeadRow[]) ?? []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, [realtorId]);
+
+  if (loading) {
+    return <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
+  }
+
+  if (leads.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+        <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground" />
+        <p className="mt-3 text-sm text-muted-foreground">No leads yet. When buyers tap "Contact on WhatsApp" on your listings, they'll show up here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-4 sm:p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-green">Leads</p>
+            <h3 className="mt-1 text-lg font-medium">{leads.length} total inquiries</h3>
+          </div>
+          <Button variant="outline" size="sm" onClick={load}><RefreshCw className="h-3.5 w-3.5" /> Refresh</Button>
+        </div>
+      </div>
+      <ul className="divide-y divide-border">
+        {leads.map((l) => (
+          <li key={l.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{l.listings?.title ?? "Listing"}</p>
+              <p className="text-xs text-muted-foreground">{l.listings?.area ?? ""} · {new Date(l.created_at).toLocaleString()}</p>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              {l.buyer_name || l.buyer_phone ? (
+                <>
+                  {l.buyer_name && <span className="text-foreground">{l.buyer_name}</span>}
+                  {l.buyer_phone && (
+                    <a href={`https://wa.me/${l.buyer_phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-green/40 bg-green/10 px-2.5 py-1 text-xs font-medium text-green">
+                      <MessageCircle className="h-3 w-3" /> {l.buyer_phone}
+                    </a>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs text-muted-foreground">Anonymous · via {l.channel}</span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
