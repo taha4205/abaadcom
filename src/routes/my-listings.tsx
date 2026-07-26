@@ -433,6 +433,7 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
     title: listing.title, area: listing.area, intent: listing.intent, category: listing.category,
     beds: listing.beds, baths: listing.baths, size: listing.size_sqyd, price: listing.price_num,
     whatsapp: listing.whatsapp_number ?? "", imageUrl: listing.image_url ?? "",
+    imageUrls: listing.image_urls ?? [],
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<FormState>) => setS((prev) => ({ ...prev, ...p }));
@@ -446,7 +447,8 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
       baths: s.category === "plot" ? 0 : s.baths,
       size_sqyd: s.size, price_num: s.price, price_text: formatPKR(s.price, s.intent),
       whatsapp_number: s.whatsapp || null,
-      image_url: s.imageUrl || null,
+      image_url: s.imageUrl || s.imageUrls[0] || null,
+      image_urls: s.imageUrls,
     }).eq("id", listing.id);
     setBusy(false);
     if (error) return toast.error(error.message);
