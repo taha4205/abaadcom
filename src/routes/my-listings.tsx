@@ -473,3 +473,73 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
     </Dialog>
   );
 }
+
+function LeadsPanel({ realtorId }: { realtorId: string }) {
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("leads")
+      .select("id, listing_id, buyer_name, buyer_phone, channel, created_at, listings(title, area)")
+      .eq("realtor_id", realtorId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setLeads((data as any as LeadRow[]) ?? []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, [realtorId]);
+
+  if (loading) {
+    return <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
+  }
+
+  if (leads.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+        <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground" />
+        <p className="mt-3 text-sm text-muted-foreground">No leads yet. When buyers tap "Contact on WhatsApp" on your listings, they'll show up here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-4 sm:p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-green">Leads</p>
+            <h3 className="mt-1 text-lg font-medium">{leads.length} total inquiries</h3>
+          </div>
+          <Button variant="outline" size="sm" onClick={load}><RefreshCw className="h-3.5 w-3.5" /> Refresh</Button>
+        </div>
+      </div>
+      <ul className="divide-y divide-border">
+        {leads.map((l) => (
+          <li key={l.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{l.listings?.title ?? "Listing"}</p>
+              <p className="text-xs text-muted-foreground">{l.listings?.area ?? ""} · {new Date(l.created_at).toLocaleString()}</p>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              {l.buyer_name || l.buyer_phone ? (
+                <>
+                  {l.buyer_name && <span className="text-foreground">{l.buyer_name}</span>}
+                  {l.buyer_phone && (
+                    <a href={`https://wa.me/${l.buyer_phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-green/40 bg-green/10 px-2.5 py-1 text-xs font-medium text-green">
+                      <MessageCircle className="h-3 w-3" /> {l.buyer_phone}
+                    </a>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs text-muted-foreground">Anonymous · via {l.channel}</span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
