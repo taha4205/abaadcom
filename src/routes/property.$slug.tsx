@@ -204,6 +204,25 @@ function PropertyPage() {
           </aside>
         </div>
 
+        {typeof p.lat === "number" && typeof p.lng === "number" && (
+          <section className="mt-12">
+            <h2 className="font-display text-lg font-medium text-navy">Location</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Approximate location in {p.area}, Karachi.</p>
+            <div className="mt-4">
+              <ClientOnly fallback={<div className="h-[360px] w-full rounded-xl bg-secondary" />}>
+                <Suspense fallback={<div className="h-[360px] w-full rounded-xl bg-secondary" />}>
+                  <LeafletMap
+                    center={[p.lat, p.lng]}
+                    zoom={14}
+                    height={360}
+                    markers={[{ id: String(p.id), lat: p.lat, lng: p.lng, title: p.title, price: p.price }]}
+                  />
+                </Suspense>
+              </ClientOnly>
+            </div>
+          </section>
+        )}
+
         {p.realtorId && (
           <div className="mt-12">
             <ReviewSection realtorId={p.realtorId} />
