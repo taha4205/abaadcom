@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Loader2, LogIn, Clock, Pencil, Eye, EyeOff, RefreshCw, Plus, ShieldCheck,
   Building2, Home as HomeIcon, Store, TreePine, Sparkles, Bed, Bath, Maximize, MapPin,
+  Upload, X as XIcon, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { Header, Footer } from "@/components/site-chrome";
 import { AuthModal } from "@/components/auth-modal";
-import { KARACHI_AREAS, formatPKR, type Intent, type Category } from "@/lib/properties";
+import { KARACHI_AREAS, formatPKR, uploadListingImage, type Intent, type Category } from "@/lib/properties";
 import { useAuth, type RealtorProfile } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { estimatePrice } from "@/lib/price-estimator.functions";
