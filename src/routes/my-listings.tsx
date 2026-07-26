@@ -160,9 +160,10 @@ function Dashboard({ realtor }: { realtor: RealtorProfile }) {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mt-6">
-        <TabsList className="grid w-full max-w-sm grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="my">My Listings</TabsTrigger>
           <TabsTrigger value="add"><Plus className="h-3.5 w-3.5" /> Add New</TabsTrigger>
+          <TabsTrigger value="leads"><MessageCircle className="h-3.5 w-3.5" /> Leads</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my" className="mt-6">
