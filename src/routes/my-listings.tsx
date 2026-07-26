@@ -409,7 +409,8 @@ function AddListingForm({ realtor, onCreated }: { realtor: RealtorProfile; onCre
       size_sqyd: s.size, price_num: s.price, price_text: formatPKR(s.price, s.intent),
       tier: realtor.package_tier,
       whatsapp_number: s.whatsapp || null,
-      image_url: s.imageUrl || null,
+      image_url: s.imageUrl || s.imageUrls[0] || null,
+      image_urls: s.imageUrls,
     });
     setBusy(false);
     if (error) return toast.error(error.message);
