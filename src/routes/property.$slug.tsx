@@ -65,6 +65,8 @@ function PropertyPage() {
   const { has, toggle } = useWishlist();
   const saved = has(p.id);
   const [allLoaded, setAllLoaded] = useState(false);
+  const gallery = (p.images && p.images.length > 0) ? p.images : [p.image];
+  const [activeImg, setActiveImg] = useState(gallery[0]);
 
   useEffect(() => { fetchLiveListings().then(() => setAllLoaded(true)); }, []);
 
