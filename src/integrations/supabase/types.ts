@@ -113,6 +113,54 @@ export type Database = {
           },
         ]
       }
+      listing_views: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          listing_id: string
+          realtor_id: string
+          viewer_name: string | null
+          viewer_phone: string | null
+          viewer_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          listing_id: string
+          realtor_id: string
+          viewer_name?: string | null
+          viewer_phone?: string | null
+          viewer_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          listing_id?: string
+          realtor_id?: string
+          viewer_name?: string | null
+          viewer_phone?: string | null
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_views_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_views_realtor_id_fkey"
+            columns: ["realtor_id"]
+            isOneToOne: false
+            referencedRelation: "realtors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           area: string
