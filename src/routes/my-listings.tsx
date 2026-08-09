@@ -639,7 +639,14 @@ function ListingFields({ s, set }: { s: FormState; set: (p: Partial<FormState>) 
   );
 }
 
-function AddListingForm({ realtor, onCreated }: { realtor: RealtorProfile; onCreated: () => void }) {
+const CATS = [
+  { v: "house", l: "House", Icon: HomeIcon },
+  { v: "flat", l: "Flat", Icon: Building2 },
+  { v: "commercial", l: "Commercial", Icon: Store },
+  { v: "plot", l: "Plot", Icon: TreePine },
+] as const;
+
+function AddListingForm({ realtor, slotLabel, onCreated }: { realtor: RealtorProfile; slotLabel?: string; onCreated: () => void }) {
   const [s, setS] = useState<FormState>({
     title: "", area: "DHA Phase 6", intent: "buy", category: "house",
     beds: 3, baths: 3, size: 500, price: 50000000, whatsapp: realtor.phone || "", imageUrl: "", imageUrls: [],
