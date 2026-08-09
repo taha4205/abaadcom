@@ -118,14 +118,22 @@ function PropertyPage() {
         {/* Hero image */}
         <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary">
           <img src={activeImg} alt={p.title} className="h-full w-full object-cover" />
-          {p.verified && (
-            <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
-              <ShieldCheck className="mr-1 h-3 w-3" /> Verified
-            </Badge>
-          )}
+          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+            {boost.active && (
+              <Badge className={`border-0 ${boost.tier === "super_hot" ? "bg-navy text-navy-foreground" : "bg-orange-600 text-white"}`}>
+                {boost.label} · {boost.daysLeft}d left
+              </Badge>
+            )}
+            {p.verified && (
+              <Badge className="border-0 bg-green text-green-foreground">
+                <ShieldCheck className="mr-1 h-3 w-3" /> Verified
+              </Badge>
+            )}
+          </div>
           {p.tier && (
             <Badge className="absolute left-4 bottom-4 border-0 bg-navy text-navy-foreground">{p.tier}</Badge>
           )}
+
           <div className="absolute right-4 top-4 flex gap-2">
             <button
               onClick={share}
@@ -135,7 +143,8 @@ function PropertyPage() {
               <Share2 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => toggle(p.id)}
+              onClick={onSave}
+
               className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-navy shadow hover:bg-white"
               aria-label={saved ? "Unsave" : "Save"}
             >
