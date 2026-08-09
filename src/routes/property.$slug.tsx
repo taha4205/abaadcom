@@ -14,7 +14,11 @@ import {
 import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
 import { logLead } from "@/lib/leads";
+import { logListingView } from "@/lib/views";
+import { boostStatus } from "@/lib/boosts";
+import { AuthModal } from "@/components/auth-modal";
 import { ReviewSection } from "@/components/review-section";
+
 import { ClientOnly } from "@/components/client-only";
 import { lazy, Suspense } from "react";
 const LeafletMap = lazy(() => import("@/components/leaflet-map"));
@@ -65,10 +69,23 @@ function PropertyPage() {
   const { has, toggle } = useWishlist();
   const saved = has(p.id);
   const [allLoaded, setAllLoaded] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const gallery = (p.images && p.images.length > 0) ? p.images : [p.image];
   const [activeImg, setActiveImg] = useState(gallery[0]);
+  const boost = boostStatus(p.boostTier, p.boostExpiresAt);
 
   useEffect(() => { fetchLiveListings().then(() => setAllLoaded(true)); }, []);
+  useEffect(() => {
+    logListingView({ listingId: p.id, realtorId: p.realtorId, eventType: "view" });
+  }, [p.id, p.realtorId]);
+
+  async function onSave() {
+    const r = await toggle(p.id);
+    if (r === "unauthenticated") setAuthOpen(true);
+    else if (r === "error") toast.error("Couldn't update your wishlist. Try again.");
+    else if (r === "added") toast.success("Saved to your wishlist");
+  }
+
 
   const wa = (p.whatsapp ?? p.realtorPhone ?? "923001234567").replace(/\D/g, "");
   const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${p.title} on abaad.com`)}`;
