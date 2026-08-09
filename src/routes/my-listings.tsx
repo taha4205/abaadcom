@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Loader2, LogIn, Clock, Pencil, Eye, EyeOff, RefreshCw, Plus, ShieldCheck,
   Building2, Home as HomeIcon, Store, TreePine, Sparkles, Bed, Bath, Maximize, MapPin,
-  Upload, X as XIcon, MessageCircle,
+  Upload, X as XIcon, MessageCircle, Flame, Zap, Star, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Header, Footer } from "@/components/site-chrome";
 import { AuthModal } from "@/components/auth-modal";
@@ -22,6 +22,10 @@ import { KARACHI_AREAS, formatPKR, uploadListingImage, type Intent, type Categor
 import { useAuth, type RealtorProfile } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { estimatePrice } from "@/lib/price-estimator.functions";
+import { BOOST_PLANS, boostStatus, purchaseBoost, cancelBoost, type BoostTier } from "@/lib/boosts";
+import { FREE_SLOTS, paidCap, totalAllowance, freeSlotsUsed } from "@/lib/packages";
+import { viewerLabel, type ListingViewRow } from "@/lib/views";
+import { realtorReviewStats } from "@/lib/reviews";
 
 export const Route = createFileRoute("/my-listings")({
   head: () => ({ meta: [{ title: "My Listings — abaad.com" }, { name: "robots", content: "noindex" }] }),
@@ -46,6 +50,8 @@ type Listing = {
   image_urls: string[] | null;
   verified: boolean;
   is_active: boolean;
+  boost_tier: string | null;
+  boost_expires_at: string | null;
 };
 
 type LeadRow = {
@@ -57,6 +63,7 @@ type LeadRow = {
   created_at: string;
   listings?: { title: string; area: string } | null;
 };
+
 
 function MyListingsPage() {
   const { user, realtor, loading } = useAuth();
