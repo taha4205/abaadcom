@@ -14,7 +14,11 @@ import {
 import { useWishlist } from "@/lib/wishlist";
 import { responseTimeLabel } from "@/lib/realtors";
 import { logLead } from "@/lib/leads";
+import { logListingView } from "@/lib/views";
+import { boostStatus } from "@/lib/boosts";
+import { AuthModal } from "@/components/auth-modal";
 import { ReviewSection } from "@/components/review-section";
+
 import { ClientOnly } from "@/components/client-only";
 import { lazy, Suspense } from "react";
 const LeafletMap = lazy(() => import("@/components/leaflet-map"));
@@ -65,10 +69,23 @@ function PropertyPage() {
   const { has, toggle } = useWishlist();
   const saved = has(p.id);
   const [allLoaded, setAllLoaded] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const gallery = (p.images && p.images.length > 0) ? p.images : [p.image];
   const [activeImg, setActiveImg] = useState(gallery[0]);
+  const boost = boostStatus(p.boostTier, p.boostExpiresAt);
 
   useEffect(() => { fetchLiveListings().then(() => setAllLoaded(true)); }, []);
+  useEffect(() => {
+    logListingView({ listingId: p.id, realtorId: p.realtorId, eventType: "view" });
+  }, [p.id, p.realtorId]);
+
+  async function onSave() {
+    const r = await toggle(p.id);
+    if (r === "unauthenticated") setAuthOpen(true);
+    else if (r === "error") toast.error("Couldn't update your wishlist. Try again.");
+    else if (r === "added") toast.success("Saved to your wishlist");
+  }
+
 
   const wa = (p.whatsapp ?? p.realtorPhone ?? "923001234567").replace(/\D/g, "");
   const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${p.title} on abaad.com`)}`;
@@ -101,14 +118,22 @@ function PropertyPage() {
         {/* Hero image */}
         <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary">
           <img src={activeImg} alt={p.title} className="h-full w-full object-cover" />
-          {p.verified && (
-            <Badge className="absolute left-4 top-4 border-0 bg-green text-green-foreground">
-              <ShieldCheck className="mr-1 h-3 w-3" /> Verified
-            </Badge>
-          )}
+          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+            {boost.active && (
+              <Badge className={`border-0 ${boost.tier === "super_hot" ? "bg-navy text-navy-foreground" : "bg-orange-600 text-white"}`}>
+                {boost.label} · {boost.daysLeft}d left
+              </Badge>
+            )}
+            {p.verified && (
+              <Badge className="border-0 bg-green text-green-foreground">
+                <ShieldCheck className="mr-1 h-3 w-3" /> Verified
+              </Badge>
+            )}
+          </div>
           {p.tier && (
             <Badge className="absolute left-4 bottom-4 border-0 bg-navy text-navy-foreground">{p.tier}</Badge>
           )}
+
           <div className="absolute right-4 top-4 flex gap-2">
             <button
               onClick={share}
@@ -118,7 +143,8 @@ function PropertyPage() {
               <Share2 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => toggle(p.id)}
+              onClick={onSave}
+
               className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-navy shadow hover:bg-white"
               aria-label={saved ? "Unsave" : "Save"}
             >
@@ -192,7 +218,11 @@ function PropertyPage() {
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => logLead({ listingId: p.id, realtorId: p.realtorId })}
+                onClick={() => {
+                  logLead({ listingId: p.id, realtorId: p.realtorId });
+                  logListingView({ listingId: p.id, realtorId: p.realtorId, eventType: "click" });
+                }}
+
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-green px-3 py-2.5 text-sm font-medium text-green-foreground hover:bg-green/90"
               >
                 <MessageCircle className="h-4 w-4" /> Contact on WhatsApp
@@ -243,9 +273,19 @@ function PropertyPage() {
         )}
       </main>
       <Footer />
+      <AuthModal
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        defaultTab="signup"
+        defaultRole="buyer"
+        title="Save this property"
+        description="Create a free buyer account (or sign in) to keep this listing in your wishlist."
+      />
     </div>
   );
 }
+
+
 
 function Spec({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (

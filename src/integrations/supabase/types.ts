@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      buyer_profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -86,11 +113,62 @@ export type Database = {
           },
         ]
       }
+      listing_views: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          listing_id: string
+          realtor_id: string
+          viewer_name: string | null
+          viewer_phone: string | null
+          viewer_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          listing_id: string
+          realtor_id: string
+          viewer_name?: string | null
+          viewer_phone?: string | null
+          viewer_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          listing_id?: string
+          realtor_id?: string
+          viewer_name?: string | null
+          viewer_phone?: string | null
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_views_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_views_realtor_id_fkey"
+            columns: ["realtor_id"]
+            isOneToOne: false
+            referencedRelation: "realtors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           area: string
           baths: number
           beds: number
+          boost_expires_at: string | null
+          boost_purchased_at: string | null
+          boost_tier: string | null
           category: string
           created_at: string
           id: string
@@ -113,6 +191,9 @@ export type Database = {
           area: string
           baths?: number
           beds?: number
+          boost_expires_at?: string | null
+          boost_purchased_at?: string | null
+          boost_tier?: string | null
           category: string
           created_at?: string
           id?: string
@@ -135,6 +216,9 @@ export type Database = {
           area?: string
           baths?: number
           beds?: number
+          boost_expires_at?: string | null
+          boost_purchased_at?: string | null
+          boost_tier?: string | null
           category?: string
           created_at?: string
           id?: string
@@ -247,6 +331,27 @@ export type Database = {
           response_time?: string
           status?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          user_id?: string
         }
         Relationships: []
       }

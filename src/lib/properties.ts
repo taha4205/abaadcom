@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { boostRank } from "@/lib/boosts";
+
 
 export type Intent = "buy" | "rent";
 export type Category = "flat" | "house" | "commercial" | "plot";
@@ -27,6 +29,9 @@ export type Property = {
   responseTime?: string;
   realtorPhone?: string;
   createdAt?: string;
+  boostTier?: string | null;
+  boostExpiresAt?: string | null;
+
 };
 
 export const KARACHI_AREAS = [
@@ -109,6 +114,9 @@ function rowToProperty(row: any): Property {
     verified: !!row.verified,
     whatsapp: row.whatsapp_number || undefined,
     createdAt: row.created_at,
+    boostTier: row.boost_tier ?? null,
+    boostExpiresAt: row.boost_expires_at ?? null,
+
   };
 }
 
@@ -151,25 +159,41 @@ export function findPropertyBySlug(slug: string): Property | undefined {
 }
 
 export type SortKey = "newest" | "low" | "high";
+
+/** Boosted listings always float to the top of whatever list they're in. */
+function rankOf(p: Property): number {
+  return boostRank(p.boostTier, p.boostExpiresAt);
+}
+
 export function sortProperties(list: Property[], key: SortKey): Property[] {
   const copy = [...list];
-  if (key === "low") copy.sort((a, b) => a.priceNum - b.priceNum);
-  else if (key === "high") copy.sort((a, b) => b.priceNum - a.priceNum);
-  else copy.sort((a, b) => {
+  const base = (a: Property, b: Property) => {
+    if (key === "low") return a.priceNum - b.priceNum;
+    if (key === "high") return b.priceNum - a.priceNum;
     // Live listings (uuid) with createdAt sort first by date; seed keeps id order.
     if (a.createdAt && b.createdAt) return b.createdAt.localeCompare(a.createdAt);
     if (a.createdAt) return -1;
     if (b.createdAt) return 1;
     return Number(a.id) - Number(b.id);
-  });
+  };
+  copy.sort((a, b) => (rankOf(b) - rankOf(a)) || base(a, b));
   return copy;
 }
 
+/** Super Hot boosted listings, for the homepage spotlight. */
+export function superHotListings(list: Property[]): Property[] {
+  return list.filter((p) => boostRank(p.boostTier, p.boostExpiresAt) === 2);
+}
+
 export const PACKAGES = [
-  { tier: "Silver" as const, price: 50000, perks: ["1 active listing", "30-day visibility", "Standard placement"] },
-  { tier: "Gold" as const, price: 75000, perks: ["3 active listings", "60-day visibility", "Featured badge", "AI listing assistant"] },
-  { tier: "Platinum" as const, price: 125000, perks: ["10 active listings", "90-day visibility", "Top of search results", "Priority support", "AI listing assistant"] },
+  { tier: "Starter" as const, price: 10000, perks: ["3 paid listings + 2 free", "Standard placement", "WhatsApp leads"] },
+  { tier: "Growth" as const, price: 25000, perks: ["5 paid listings + 2 free", "Featured placement", "AI listing assistant"] },
+  { tier: "Pro" as const, price: 50000, perks: ["7 paid listings + 2 free", "Priority placement", "AI price estimator"] },
+  { tier: "Silver" as const, price: 200000, perks: ["75 listings", "Featured placement", "Up to 3 agents"] },
+  { tier: "Gold" as const, price: 500000, perks: ["75 listings", "Priority placement", "Up to 7 agents"] },
+  { tier: "Platinum" as const, price: 1000000, perks: ["75 listings", "Top placement + homepage featured", "Unlimited agents"] },
 ];
+
 
 export function formatPKR(n: number, intent: Intent): string {
   if (intent === "rent") return `PKR ${n.toLocaleString("en-PK")}/mo`;

@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, MessageCircle, Crown, Award, Star } from "lucide-react";
+import { Check, MessageCircle, Crown, Award, Star, Flame, Zap } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { Badge } from "@/components/ui/badge";
+import { AGENCY_LISTING_CAP, FREE_SLOTS } from "@/lib/packages";
+import { BOOST_PLANS } from "@/lib/boosts";
+
 
 export const Route = createFileRoute("/packages")({
   head: () => ({
@@ -29,23 +32,24 @@ type Plan = {
 
 const REALTOR_PLANS: Plan[] = [
   { name: "Starter", price: 10000, listings: 3, rank: "Standard", Icon: Star,
-    features: ["3 active listings", "Standard placement", "WhatsApp leads", "Verified badge on approval", "Basic listing analytics"] },
+    features: ["3 active listings", "+ 2 free listing slots", "Standard placement", "WhatsApp leads", "Verified badge on approval"] },
   { name: "Growth", price: 25000, listings: 5, rank: "Featured", Icon: Award, highlight: true,
-    features: ["5 active listings", "Featured placement", "Priority over Starter", "AI listing assistant", "Response time badge"] },
+    features: ["5 active listings", "+ 2 free listing slots", "Featured placement", "AI listing assistant", "Response time badge"] },
   { name: "Pro", price: 50000, listings: 7, rank: "Priority", Icon: Crown,
-    features: ["7 active listings", "Priority placement on search", "AI listing assistant + price estimator", "Dedicated WhatsApp support", "Performance dashboard"] },
+    features: ["7 active listings", "+ 2 free listing slots", "Priority placement on search", "AI listing assistant + price estimator", "Performance dashboard"] },
 ];
 
 const AGENCY_PLANS: Plan[] = [
-  { name: "Silver", price: 200000, listings: 3, rank: "Featured", Icon: Star,
-    features: ["3 active listings", "Featured placement", "Up to 3 agents", "Agency profile page", "Quarterly performance review"] },
-  { name: "Gold", price: 500000, listings: 5, rank: "Priority", Icon: Award, highlight: true,
-    features: ["5 active listings", "Priority placement", "Up to 7 agents", "Verified agency badge", "Co-marketing on abaad Magazine"] },
-  { name: "Platinum", price: 1000000, listings: 7, rank: "Top Placement + Homepage Featured", Icon: Crown,
-    features: ["7 active listings", "Top placement + homepage featured", "Unlimited agents", "Dedicated account manager", "Featured editorial in abaad Magazine"] },
+  { name: "Silver", price: 200000, listings: AGENCY_LISTING_CAP, rank: "Featured", Icon: Star,
+    features: [`${AGENCY_LISTING_CAP} active listings`, "+ 2 free listing slots", "Featured placement", "Up to 3 agents", "Agency profile page"] },
+  { name: "Gold", price: 500000, listings: AGENCY_LISTING_CAP, rank: "Priority", Icon: Award, highlight: true,
+    features: [`${AGENCY_LISTING_CAP} active listings`, "+ 2 free listing slots", "Priority placement", "Up to 7 agents", "Verified agency badge"] },
+  { name: "Platinum", price: 1000000, listings: AGENCY_LISTING_CAP, rank: "Top Placement + Homepage Featured", Icon: Crown,
+    features: [`${AGENCY_LISTING_CAP} active listings`, "+ 2 free listing slots", "Top placement + homepage featured", "Unlimited agents", "Dedicated account manager"] },
 ];
 
 const WA = "923001234567";
+
 
 function waLink(name: string) {
   return `https://wa.me/${WA}?text=${encodeURIComponent(`Hi, I'm interested in the ${name} package on abaad.com`)}`;
@@ -67,7 +71,11 @@ function PackagesPage() {
           <p className="mt-4 text-sm text-muted-foreground sm:text-base">
             Whether you're an independent realtor or a full agency, abaad gives you the placement and tools to close faster.
           </p>
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-green/30 bg-green/5 px-4 py-1.5 text-xs font-medium text-green">
+            Every account includes {FREE_SLOTS} free listing slots — no package required.
+          </p>
         </div>
+
 
         <div className="mt-8 flex justify-center">
           <div className="inline-flex rounded-full border border-border bg-secondary p-1">
@@ -147,7 +155,34 @@ function PackagesPage() {
           })}
         </div>
 
+        {/* Per-listing boosts */}
+        <section className="mt-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-medium uppercase tracking-wider text-green">Boosts</p>
+            <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
+              Push a single listing <span className="italic text-navy">to the front.</span>
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Boosts are bought per listing from your dashboard and run for 30 days, then revert automatically.
+            </p>
+          </div>
+          <div className="mx-auto mt-8 grid max-w-3xl gap-5 sm:grid-cols-2">
+            {BOOST_PLANS.map((b) => (
+              <article key={b.tier} className="flex flex-col rounded-2xl border border-border bg-card p-6 sm:p-8">
+                <div className="flex items-center gap-2">
+                  {b.tier === "super_hot" ? <Zap className="h-5 w-5 text-navy" /> : <Flame className="h-5 w-5 text-orange-600" />}
+                  <p className="font-display text-lg font-medium">{b.label}</p>
+                </div>
+                <p className="mt-4 font-display text-3xl font-medium text-green">PKR {b.price.toLocaleString("en-PK")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">per listing · {b.days} days</p>
+                <p className="mt-4 text-sm text-muted-foreground">{b.blurb}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <div className="mt-16 rounded-2xl border border-border bg-navy p-8 text-center text-navy-foreground sm:p-12">
+
           <h2 className="font-display text-2xl font-medium sm:text-3xl">Need a custom solution?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-white/75 sm:text-base">
             Have specific requirements? We'll build a package around your needs.
