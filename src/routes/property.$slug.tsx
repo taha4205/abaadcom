@@ -285,9 +285,7 @@ function PropertyPage() {
   );
 }
 
-    </div>
-  );
-}
+
 
 function Spec({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
