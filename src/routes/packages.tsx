@@ -71,7 +71,11 @@ function PackagesPage() {
           <p className="mt-4 text-sm text-muted-foreground sm:text-base">
             Whether you're an independent realtor or a full agency, abaad gives you the placement and tools to close faster.
           </p>
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-green/30 bg-green/5 px-4 py-1.5 text-xs font-medium text-green">
+            Every account includes {FREE_SLOTS} free listing slots — no package required.
+          </p>
         </div>
+
 
         <div className="mt-8 flex justify-center">
           <div className="inline-flex rounded-full border border-border bg-secondary p-1">
@@ -151,7 +155,34 @@ function PackagesPage() {
           })}
         </div>
 
+        {/* Per-listing boosts */}
+        <section className="mt-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-medium uppercase tracking-wider text-green">Boosts</p>
+            <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
+              Push a single listing <span className="italic text-navy">to the front.</span>
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Boosts are bought per listing from your dashboard and run for 30 days, then revert automatically.
+            </p>
+          </div>
+          <div className="mx-auto mt-8 grid max-w-3xl gap-5 sm:grid-cols-2">
+            {BOOST_PLANS.map((b) => (
+              <article key={b.tier} className="flex flex-col rounded-2xl border border-border bg-card p-6 sm:p-8">
+                <div className="flex items-center gap-2">
+                  {b.tier === "super_hot" ? <Zap className="h-5 w-5 text-navy" /> : <Flame className="h-5 w-5 text-orange-600" />}
+                  <p className="font-display text-lg font-medium">{b.label}</p>
+                </div>
+                <p className="mt-4 font-display text-3xl font-medium text-green">PKR {b.price.toLocaleString("en-PK")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">per listing · {b.days} days</p>
+                <p className="mt-4 text-sm text-muted-foreground">{b.blurb}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <div className="mt-16 rounded-2xl border border-border bg-navy p-8 text-center text-navy-foreground sm:p-12">
+
           <h2 className="font-display text-2xl font-medium sm:text-3xl">Need a custom solution?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-white/75 sm:text-base">
             Have specific requirements? We'll build a package around your needs.
