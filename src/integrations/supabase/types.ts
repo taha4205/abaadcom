@@ -91,6 +91,9 @@ export type Database = {
           area: string
           baths: number
           beds: number
+          boost_expires_at: string | null
+          boost_purchased_at: string | null
+          boost_tier: string | null
           category: string
           created_at: string
           id: string
@@ -113,6 +116,9 @@ export type Database = {
           area: string
           baths?: number
           beds?: number
+          boost_expires_at?: string | null
+          boost_purchased_at?: string | null
+          boost_tier?: string | null
           category: string
           created_at?: string
           id?: string
@@ -135,6 +141,9 @@ export type Database = {
           area?: string
           baths?: number
           beds?: number
+          boost_expires_at?: string | null
+          boost_purchased_at?: string | null
+          boost_tier?: string | null
           category?: string
           created_at?: string
           id?: string
