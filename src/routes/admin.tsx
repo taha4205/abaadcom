@@ -238,6 +238,9 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
             <RealtorsTable rows={realtors} onSetStatus={setStatus} onSetResponseTime={setResponseTime} />
           ) : section === "listings" ? (
             <ListingsTable rows={listings} onToggle={toggleListing} />
+          ) : section === "activity" ? (
+            <ActivityLog creds={creds} realtors={realtors} listings={listings} />
+
           ) : (
             <RealtorsTable rows={pending} onSetStatus={setStatus} onSetResponseTime={setResponseTime} prominent />
           )}
