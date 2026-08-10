@@ -7,7 +7,7 @@ import { useWishlist } from "@/lib/wishlist";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator } from "lucide-react";
+import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator, TrendingUp } from "lucide-react";
 
 export function Header() {
   const [authOpen, setAuthOpen] = useState(false);
