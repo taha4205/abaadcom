@@ -111,8 +111,11 @@ export function Footer() {
             { to: "/", label: "Buy" },
             { to: "/rent", label: "Rent" },
             { to: "/magazine", label: "Magazine" },
+            { to: "/trends", label: "Market Trends" },
+            { to: "/wishlist", label: "My Wishlist" },
             { to: "/calculator", label: "Loan Calculator" },
           ]} />
+
           <FooterCol title="Realtors" links={[
             { to: "/packages", label: "Packages" },
             { to: "/list", label: "List property" },
