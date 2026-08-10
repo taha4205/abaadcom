@@ -7,7 +7,7 @@ import { useWishlist } from "@/lib/wishlist";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator } from "lucide-react";
+import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator, TrendingUp } from "lucide-react";
 
 export function Header() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -40,8 +40,16 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link to="/calculator"><Calculator className="mr-2 h-4 w-4" /> Home Loan Calculator</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/trends"><TrendingUp className="mr-2 h-4 w-4" /> Market Trends</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/wishlist"><Heart className="mr-2 h-4 w-4" /> My Wishlist</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+
           <Link to="/packages" className="text-muted-foreground hover:text-navy">Packages</Link>
           <Link to="/about" className="text-muted-foreground hover:text-navy">About</Link>
           <Link to="/contact" className="text-muted-foreground hover:text-navy">Contact</Link>
@@ -103,8 +111,11 @@ export function Footer() {
             { to: "/", label: "Buy" },
             { to: "/rent", label: "Rent" },
             { to: "/magazine", label: "Magazine" },
+            { to: "/trends", label: "Market Trends" },
+            { to: "/wishlist", label: "My Wishlist" },
             { to: "/calculator", label: "Loan Calculator" },
           ]} />
+
           <FooterCol title="Realtors" links={[
             { to: "/packages", label: "Packages" },
             { to: "/list", label: "List property" },

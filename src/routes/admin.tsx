@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PACKAGES } from "@/lib/properties";
+import { viewerLabel, type ListingViewRow } from "@/lib/views";
 import {
-  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil,
+  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil, adminFetchViews,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -23,7 +24,8 @@ const SESSION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 type Creds = { email: string; password: string };
 type Session = { token: string; expires: number; email: string; password: string };
-type Section = "overview" | "realtors" | "listings" | "requests";
+type Section = "overview" | "realtors" | "listings" | "requests" | "activity";
+
 
 function loadSession(): Session | null {
   if (typeof window === "undefined") return null;
@@ -173,8 +175,10 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
     { v: "overview", label: "Overview", Icon: LayoutDashboard },
     { v: "realtors", label: "Realtors", Icon: Users },
     { v: "listings", label: "Listings", Icon: ListIcon },
+    { v: "activity", label: "Activity", Icon: Activity },
     { v: "requests", label: "Requests", Icon: Inbox, badge: pending.length },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -234,6 +238,9 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
             <RealtorsTable rows={realtors} onSetStatus={setStatus} onSetResponseTime={setResponseTime} />
           ) : section === "listings" ? (
             <ListingsTable rows={listings} onToggle={toggleListing} />
+          ) : section === "activity" ? (
+            <ActivityLog creds={creds} realtors={realtors} listings={listings} />
+
           ) : (
             <RealtorsTable rows={pending} onSetStatus={setStatus} onSetResponseTime={setResponseTime} prominent />
           )}
@@ -386,6 +393,136 @@ function ListingsTable({ rows, onToggle }: { rows: any[]; onToggle: (id: string,
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function ActivityLog({ creds, realtors, listings }: { creds: Creds; realtors: any[]; listings: any[] }) {
+  const fetchViews = useServerFn(adminFetchViews);
+  const [rows, setRows] = useState<ListingViewRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [realtorId, setRealtorId] = useState("all");
+  const [listingId, setListingId] = useState("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetchViews({ data: creds });
+      setRows(res.views as unknown as ListingViewRow[]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to load activity");
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => { load(); }, []);
+
+  const filtered = useMemo(() => rows.filter((r) => {
+    if (realtorId !== "all" && r.realtor_id !== realtorId) return false;
+    if (listingId !== "all" && r.listing_id !== listingId) return false;
+    const t = new Date(r.created_at).getTime();
+    if (from && t < new Date(`${from}T00:00:00`).getTime()) return false;
+    if (to && t > new Date(`${to}T23:59:59`).getTime()) return false;
+    return true;
+  }), [rows, realtorId, listingId, from, to]);
+
+  const listingOptions = realtorId === "all" ? listings : listings.filter((l) => l.realtor_id === realtorId);
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Total events", value: filtered.length },
+          { label: "Identified viewers", value: filtered.filter((r) => r.viewer_user_id).length },
+          { label: "Anonymous", value: filtered.filter((r) => !r.viewer_user_id).length },
+          { label: "WhatsApp clicks", value: filtered.filter((r) => r.event_type === "click").length },
+        ].map((c) => (
+          <div key={c.label} className="rounded-xl border border-border bg-card p-5">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{c.label}</p>
+            <p className="mt-2 font-display text-2xl font-medium text-navy">{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
+        <div>
+          <Label className="text-xs">Realtor</Label>
+          <select
+            value={realtorId}
+            onChange={(e) => { setRealtorId(e.target.value); setListingId("all"); }}
+            className="mt-1 block rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+          >
+            <option value="all">All realtors</option>
+            {realtors.map((r) => <option key={r.id} value={r.id}>{r.agency_name || r.full_name}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Listing</Label>
+          <select
+            value={listingId}
+            onChange={(e) => setListingId(e.target.value)}
+            className="mt-1 block max-w-[240px] rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+          >
+            <option value="all">All listings</option>
+            {listingOptions.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">From</Label>
+          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="mt-1 w-[150px]" />
+        </div>
+        <div>
+          <Label className="text-xs">To</Label>
+          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="mt-1 w-[150px]" />
+        </div>
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => { setRealtorId("all"); setListingId("all"); setFrom(""); setTo(""); }}>Reset</Button>
+          <Button size="sm" onClick={load} disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />} Refresh
+          </Button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin" /></div>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No activity for these filters.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Event</th>
+                <th className="px-4 py-3">Listing</th>
+                <th className="px-4 py-3">Realtor</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">When</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map((r) => (
+                <tr key={r.id}>
+                  <td className="px-4 py-3">
+                    <span className={r.viewer_user_id ? "font-medium" : "text-muted-foreground"}>
+                      {viewerLabel(r)}
+                    </span>{" "}
+                    {r.event_type === "click" ? "contacted about" : "viewed"}{" "}
+                    <span className="font-medium">{r.listings?.title ?? "listing"}</span>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.listings?.area ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.realtors?.agency_name ?? r.realtors?.full_name ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant="outline" className="capitalize">{r.event_type}</Badge>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleString("en-PK")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

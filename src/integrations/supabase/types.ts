@@ -360,7 +360,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      area_trends: {
+        Args: never
+        Returns: {
+          active_listings: number
+          area: string
+          avg_price: number
+          older_avg_price: number
+          older_listings: number
+          recent_avg_price: number
+          recent_listings: number
+          views: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

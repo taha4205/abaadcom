@@ -39,6 +39,21 @@ export const adminFetchAll = createServerFn({ method: "POST" })
     };
   });
 
+export const adminFetchViews = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => Creds.parse(d))
+  .handler(async ({ data }) => {
+    checkAuth(data.email, data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("listing_views")
+      .select("*, listings(title, area), realtors(full_name, agency_name)")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return { views: rows ?? [] };
+  });
+
+
 export const adminUpdateRealtor = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     Creds.extend({
