@@ -40,8 +40,14 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link to="/calculator"><Calculator className="mr-2 h-4 w-4" /> Home Loan Calculator</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/trends"><TrendingUp className="mr-2 h-4 w-4" /> Market Trends</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/wishlist"><Heart className="mr-2 h-4 w-4" /> My Wishlist</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+
           <Link to="/packages" className="text-muted-foreground hover:text-navy">Packages</Link>
           <Link to="/about" className="text-muted-foreground hover:text-navy">About</Link>
           <Link to="/contact" className="text-muted-foreground hover:text-navy">Contact</Link>
