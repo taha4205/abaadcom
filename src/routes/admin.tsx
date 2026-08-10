@@ -175,8 +175,10 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
     { v: "overview", label: "Overview", Icon: LayoutDashboard },
     { v: "realtors", label: "Realtors", Icon: Users },
     { v: "listings", label: "Listings", Icon: ListIcon },
+    { v: "activity", label: "Activity", Icon: Activity },
     { v: "requests", label: "Requests", Icon: Inbox, badge: pending.length },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-background">
