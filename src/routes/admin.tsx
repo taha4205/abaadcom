@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PACKAGES } from "@/lib/properties";
+import { viewerLabel, type ListingViewRow } from "@/lib/views";
 import {
-  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil,
+  adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil, adminFetchViews,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -23,7 +24,8 @@ const SESSION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 type Creds = { email: string; password: string };
 type Session = { token: string; expires: number; email: string; password: string };
-type Section = "overview" | "realtors" | "listings" | "requests";
+type Section = "overview" | "realtors" | "listings" | "requests" | "activity";
+
 
 function loadSession(): Session | null {
   if (typeof window === "undefined") return null;
