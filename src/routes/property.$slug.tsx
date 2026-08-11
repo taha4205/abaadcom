@@ -234,6 +234,12 @@ function PropertyPage() {
           </aside>
         </div>
 
+        <div className="mt-12 grid gap-6">
+          <SiteVisitForm p={p} waNumber={wa} />
+          <FinancingForm p={p} />
+          <AreaLocalData area={p.area} subArea={p.subArea} />
+        </div>
+
         {typeof p.lat === "number" && typeof p.lng === "number" && (
           <section className="mt-12">
             <h2 className="font-display text-lg font-medium text-navy">Location</h2>
