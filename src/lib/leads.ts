@@ -1,10 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type LeadType = "contact" | "site_visit" | "financing";
+
 // Fire-and-forget: log a WhatsApp contact click as a lead.
 // Anonymous is fine — buyer_user_id is set only if signed in.
 export async function logLead(params: {
   listingId: string | number;
   realtorId?: string;
+  leadType?: LeadType;
+  details?: Record<string, unknown>;
 }) {
   const listingId = String(params.listingId);
   // Seed listings use numeric ids — skip DB write for those.
@@ -22,6 +26,8 @@ export async function logLead(params: {
       buyer_name: (meta.full_name as string) ?? null,
       buyer_phone: (meta.phone as string) ?? null,
       channel: "whatsapp",
+      lead_type: params.leadType ?? "contact",
+      details: (params.details ?? null) as never,
     });
   } catch {
     /* silent — lead logging is best-effort */
