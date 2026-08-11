@@ -105,6 +105,7 @@ function rowToProperty(row: any): Property {
     id: row.id,
     title: row.title,
     area: row.area,
+    subArea: row.sub_area ?? null,
     price: row.price_text,
     priceNum: Number(row.price_num),
     intent: row.intent,
