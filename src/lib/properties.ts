@@ -230,3 +230,14 @@ export async function uploadListingImage(file: File): Promise<string | null> {
   if (error) return null;
   return supabase.storage.from("listing-images").getPublicUrl(path).data.publicUrl;
 }
+
+/** Distinct sub-areas (phase / block / precinct / sector) present for a broad area. */
+export function subAreasFor(list: Property[], area: string): string[] {
+  const set = new Set<string>();
+  for (const p of list) {
+    if (area !== "Any area" && p.area !== area) continue;
+    const s = (p.subArea ?? "").trim();
+    if (s && s !== p.area) set.add(s);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+}
