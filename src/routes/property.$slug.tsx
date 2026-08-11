@@ -18,6 +18,9 @@ import { logListingView } from "@/lib/views";
 import { boostStatus } from "@/lib/boosts";
 import { AuthModal } from "@/components/auth-modal";
 import { ReviewSection } from "@/components/review-section";
+import { SiteVisitForm } from "@/components/site-visit-form";
+import { FinancingForm } from "@/components/financing-form";
+import { AreaLocalData } from "@/components/area-local-data";
 
 import { ClientOnly } from "@/components/client-only";
 import { lazy, Suspense } from "react";
@@ -232,6 +235,12 @@ function PropertyPage() {
               </p>
             </div>
           </aside>
+        </div>
+
+        <div className="mt-12 grid gap-6">
+          <SiteVisitForm p={p} waNumber={wa} />
+          <FinancingForm p={p} />
+          <AreaLocalData area={p.area} subArea={p.subArea} />
         </div>
 
         {typeof p.lat === "number" && typeof p.lng === "number" && (

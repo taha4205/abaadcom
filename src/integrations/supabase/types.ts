@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      area_reports: {
+        Row: {
+          area: string
+          created_at: string
+          gas_loadshedding: string | null
+          id: string
+          is_approved: boolean
+          notes: string | null
+          security_rating: number
+          sub_area: string | null
+          updated_at: string
+          user_id: string
+          water_timing: string | null
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          gas_loadshedding?: string | null
+          id?: string
+          is_approved?: boolean
+          notes?: string | null
+          security_rating?: number
+          sub_area?: string | null
+          updated_at?: string
+          user_id: string
+          water_timing?: string | null
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          gas_loadshedding?: string | null
+          id?: string
+          is_approved?: boolean
+          notes?: string | null
+          security_rating?: number
+          sub_area?: string | null
+          updated_at?: string
+          user_id?: string
+          water_timing?: string | null
+        }
+        Relationships: []
+      }
       buyer_profiles: {
         Row: {
           created_at: string
@@ -72,7 +114,9 @@ export type Database = {
           buyer_user_id: string | null
           channel: string
           created_at: string
+          details: Json | null
           id: string
+          lead_type: string
           listing_id: string
           realtor_id: string
         }
@@ -82,7 +126,9 @@ export type Database = {
           buyer_user_id?: string | null
           channel?: string
           created_at?: string
+          details?: Json | null
           id?: string
+          lead_type?: string
           listing_id: string
           realtor_id: string
         }
@@ -92,7 +138,9 @@ export type Database = {
           buyer_user_id?: string | null
           channel?: string
           created_at?: string
+          details?: Json | null
           id?: string
+          lead_type?: string
           listing_id?: string
           realtor_id?: string
         }
@@ -182,6 +230,7 @@ export type Database = {
           price_text: string
           realtor_id: string
           size_sqyd: number
+          sub_area: string | null
           tier: string
           title: string
           verified: boolean
@@ -207,6 +256,7 @@ export type Database = {
           price_text: string
           realtor_id: string
           size_sqyd?: number
+          sub_area?: string | null
           tier: string
           title: string
           verified?: boolean
@@ -232,6 +282,7 @@ export type Database = {
           price_text?: string
           realtor_id?: string
           size_sqyd?: number
+          sub_area?: string | null
           tier?: string
           title?: string
           verified?: boolean
@@ -360,6 +411,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      area_local_data: {
+        Args: never
+        Returns: {
+          area: string
+          avg_security: number
+          gas_notes: string[]
+          reports: number
+          water_timings: string[]
+        }[]
+      }
       area_trends: {
         Args: never
         Returns: {

@@ -18,6 +18,7 @@ import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as MagazineRouteImport } from './routes/magazine'
 import { Route as ListRouteImport } from './routes/list'
+import { Route as ConverterRouteImport } from './routes/converter'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -72,6 +73,11 @@ const ListRoute = ListRouteImport.update({
   path: '/list',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConverterRoute = ConverterRouteImport.update({
+  id: '/converter',
+  path: '/converter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
+  '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
+  '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
   '/contact': typeof ContactRoute
+  '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/calculator'
     | '/contact'
+    | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/calculator'
     | '/contact'
+    | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/calculator'
     | '/contact'
+    | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CalculatorRoute: typeof CalculatorRoute
   ContactRoute: typeof ContactRoute
+  ConverterRoute: typeof ConverterRoute
   ListRoute: typeof ListRoute
   MagazineRoute: typeof MagazineRouteWithChildren
   MyListingsRoute: typeof MyListingsRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/list'
       fullPath: '/list'
       preLoaderRoute: typeof ListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/converter': {
+      id: '/converter'
+      path: '/converter'
+      fullPath: '/converter'
+      preLoaderRoute: typeof ConverterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CalculatorRoute: CalculatorRoute,
   ContactRoute: ContactRoute,
+  ConverterRoute: ConverterRoute,
   ListRoute: ListRoute,
   MagazineRoute: MagazineRouteWithChildren,
   MyListingsRoute: MyListingsRoute,
