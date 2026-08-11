@@ -41,6 +41,9 @@ export function Header() {
                 <Link to="/calculator"><Calculator className="mr-2 h-4 w-4" /> Home Loan Calculator</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link to="/converter"><Calculator className="mr-2 h-4 w-4" /> Area Unit Converter</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/trends"><TrendingUp className="mr-2 h-4 w-4" /> Market Trends</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -114,6 +117,7 @@ export function Footer() {
             { to: "/trends", label: "Market Trends" },
             { to: "/wishlist", label: "My Wishlist" },
             { to: "/calculator", label: "Loan Calculator" },
+            { to: "/converter", label: "Unit Converter" },
           ]} />
 
           <FooterCol title="Realtors" links={[
