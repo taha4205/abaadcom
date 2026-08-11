@@ -9,6 +9,7 @@ export type Property = {
   id: number | string;
   title: string;
   area: string;
+  subArea?: string | null;
   price: string;
   priceNum: number;
   intent: Intent;
@@ -38,7 +39,9 @@ export const KARACHI_AREAS = [
   "Any area",
   "DHA Phase 1", "DHA Phase 2", "DHA Phase 5", "DHA Phase 6", "DHA Phase 8",
   "Clifton", "Bahadurabad", "PECHS", "Gulshan-e-Iqbal", "Gulistan-e-Johar",
-  "North Nazimabad", "Bahria Town Karachi", "Malir", "Korangi", "Saddar", "Tariq Road",
+  "North Nazimabad", "Nazimabad", "Bahria Town Karachi", "Scheme 33", "Federal B Area",
+  "Malir", "Malir Cantonment", "Korangi", "Shah Faisal Colony", "Surjani Town",
+  "Saddar", "Tariq Road", "University Road",
 ];
 
 // Rough centroid for each Karachi area (used when a listing has no explicit lat/lng).
@@ -54,9 +57,15 @@ export const AREA_COORDS: Record<string, [number, number]> = {
   "Gulshan-e-Iqbal": [24.9209, 67.0904],
   "Gulistan-e-Johar": [24.9084, 67.1345],
   "North Nazimabad": [24.9412, 67.0350],
+  "Nazimabad": [24.9137, 67.0350],
   "Bahria Town Karachi": [25.0004, 67.3220],
+  "Scheme 33": [24.9394, 67.1587],
+  "Federal B Area": [24.9285, 67.0648],
   "Malir": [24.8938, 67.2076],
+  "Malir Cantonment": [24.8770, 67.1836],
   "Korangi": [24.8378, 67.1481],
+  "Shah Faisal Colony": [24.8712, 67.1520],
+  "Surjani Town": [25.0090, 67.0745],
   "Saddar": [24.8607, 67.0184],
   "Tariq Road": [24.8712, 67.0685],
   "University Road": [24.9271, 67.1145],
