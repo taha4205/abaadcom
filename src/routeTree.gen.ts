@@ -20,6 +20,7 @@ import { Route as MagazineRouteImport } from './routes/magazine'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as ConverterRouteImport } from './routes/converter'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -83,6 +84,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConstructionRoute = ConstructionRouteImport.update({
+  id: '/construction',
+  path: '/construction',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   CalculatorRoute: typeof CalculatorRoute
+  ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
   ConverterRoute: typeof ConverterRoute
   ListRoute: typeof ListRoute
@@ -342,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/construction': {
+      id: '/construction'
+      path: '/construction'
+      fullPath: '/construction'
+      preLoaderRoute: typeof ConstructionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calculator': {
       id: '/calculator'
       path: '/calculator'
@@ -411,6 +431,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   CalculatorRoute: CalculatorRoute,
+  ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
   ConverterRoute: ConverterRoute,
   ListRoute: ListRoute,
