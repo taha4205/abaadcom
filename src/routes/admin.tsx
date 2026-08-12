@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity } from "lucide-react";
+import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity, Droplets, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,9 @@ import { PACKAGES } from "@/lib/properties";
 import { viewerLabel, type ListingViewRow } from "@/lib/views";
 import {
   adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil, adminFetchViews,
+  adminFetchAreaReports, adminSetAreaReport,
 } from "@/lib/admin.functions";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — abaad.com" }, { name: "robots", content: "noindex" }] }),
