@@ -7,7 +7,7 @@ import { useWishlist } from "@/lib/wishlist";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator, TrendingUp } from "lucide-react";
+import { User as UserIcon, LogOut, List, Heart, ChevronDown, Calculator, TrendingUp, Hammer, TreePine, MapPin } from "lucide-react";
 
 export function Header() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -28,6 +28,7 @@ export function Header() {
         <nav className="hidden items-center gap-6 text-sm md:flex">
           <Link to="/" className="text-muted-foreground hover:text-navy">Buy</Link>
           <Link to="/rent" className="text-muted-foreground hover:text-navy">Rent</Link>
+          <Link to="/plots" className="text-muted-foreground hover:text-navy">Plots</Link>
           <Link to="/realtors" className="text-muted-foreground hover:text-navy">Realtors</Link>
           <Link to="/magazine" className="text-muted-foreground hover:text-navy">Magazine</Link>
           <DropdownMenu>
@@ -42,6 +43,12 @@ export function Header() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/converter"><Calculator className="mr-2 h-4 w-4" /> Area Unit Converter</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/construction"><Hammer className="mr-2 h-4 w-4" /> Construction Cost</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/areas"><MapPin className="mr-2 h-4 w-4" /> Area Guides</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/trends"><TrendingUp className="mr-2 h-4 w-4" /> Market Trends</Link>
@@ -113,11 +120,14 @@ export function Footer() {
           <FooterCol title="Explore" links={[
             { to: "/", label: "Buy" },
             { to: "/rent", label: "Rent" },
+            { to: "/plots", label: "Plots" },
+            { to: "/areas", label: "Area Guides" },
             { to: "/magazine", label: "Magazine" },
             { to: "/trends", label: "Market Trends" },
             { to: "/wishlist", label: "My Wishlist" },
             { to: "/calculator", label: "Loan Calculator" },
             { to: "/converter", label: "Unit Converter" },
+            { to: "/construction", label: "Construction Cost" },
           ]} />
 
           <FooterCol title="Realtors" links={[

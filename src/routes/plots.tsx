@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/select";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
-  sortProperties, subAreasFor, fmtNumSafe, type SortKey,
+  sortProperties, subAreasFor, type SortKey,
 } from "@/lib/properties";
+import { fmtPKRShort } from "@/lib/units";
 
 export const Route = createFileRoute("/plots")({
   head: () => ({
@@ -133,7 +134,7 @@ function PlotsPage() {
               <div className="md:col-span-6">
                 <div className="mb-2 flex items-end justify-between">
                   <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Price (PKR)</Label>
-                  <span className="text-sm font-medium tabular-nums">{fmtNumSafe(price[0])} – {fmtNumSafe(price[1])}</span>
+                  <span className="text-sm font-medium tabular-nums">{fmtPKRShort(price[0])} – {fmtPKRShort(price[1])}</span>
                 </div>
                 <Slider value={price} onValueChange={(v) => setPrice([v[0], v[1]] as [number, number])} min={1000000} max={500000000} step={1000000} className="mt-3" />
               </div>

@@ -18,7 +18,7 @@ import { TopRealtors } from "@/components/top-realtors";
 import { MoreFilters, DEFAULT_EXTRA, applyExtraFilters, hasExtraFilters, type ExtraFilters } from "@/components/more-filters";
 import {
   KARACHI_AREAS, SEED_PROPERTIES, getLiveListings, subscribeListings, fetchLiveListings,
-  sortProperties, propertySlug, type Intent, type Category, type SortKey,
+  sortProperties, propertySlug, subAreasFor, type Intent, type Category, type SortKey,
 } from "@/lib/properties";
 
 type ViewMode = "grid" | "map";
@@ -53,6 +53,7 @@ function useListings() {
 const DEFAULT_INTENT: Intent = "buy";
 const DEFAULT_CATEGORY: Category = "flat";
 const DEFAULT_AREA = "Any area";
+const DEFAULT_SUB_AREA = "All blocks";
 const DEFAULT_KEYWORD = "";
 const DEFAULT_PLOT_SIZE: [number, number] = [120, 1000];
 
@@ -60,6 +61,7 @@ function Index() {
   const [intent, setIntent] = useState<Intent>(DEFAULT_INTENT);
   const [category, setCategory] = useState<Category>(DEFAULT_CATEGORY);
   const [area, setArea] = useState(DEFAULT_AREA);
+  const [subArea, setSubArea] = useState(DEFAULT_SUB_AREA);
   const [keyword, setKeyword] = useState(DEFAULT_KEYWORD);
   const [plotSize, setPlotSize] = useState<[number, number]>(DEFAULT_PLOT_SIZE);
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
@@ -69,18 +71,21 @@ function Index() {
   const userListings = useListings();
 
   const allProperties = useMemo(() => [...userListings, ...SEED_PROPERTIES], [userListings]);
+  const subAreaOptions = useMemo(() => subAreasFor(allProperties, area), [allProperties, area]);
+  useEffect(() => { setSubArea(DEFAULT_SUB_AREA); }, [area]);
 
   const isDefaultFilters = useMemo(() => {
     return (
       intent === DEFAULT_INTENT &&
       category === DEFAULT_CATEGORY &&
       area === DEFAULT_AREA &&
+      subArea === DEFAULT_SUB_AREA &&
       keyword === DEFAULT_KEYWORD &&
       plotSize[0] === DEFAULT_PLOT_SIZE[0] &&
       plotSize[1] === DEFAULT_PLOT_SIZE[1] &&
       !hasExtraFilters(extra)
     );
-  }, [intent, category, area, keyword, plotSize, extra]);
+  }, [intent, category, area, subArea, keyword, plotSize, extra]);
 
   useEffect(() => {
     if (!isDefaultFilters) setHasSearched(true);
@@ -90,6 +95,7 @@ function Index() {
     setIntent(DEFAULT_INTENT);
     setCategory(DEFAULT_CATEGORY);
     setArea(DEFAULT_AREA);
+    setSubArea(DEFAULT_SUB_AREA);
     setKeyword(DEFAULT_KEYWORD);
     setPlotSize(DEFAULT_PLOT_SIZE);
     setExtra(DEFAULT_EXTRA);
@@ -103,12 +109,13 @@ function Index() {
           if (p.intent !== intent) return false;
           if (p.category !== category) return false;
           if (area !== DEFAULT_AREA && p.area !== area) return false;
+          if (subArea !== DEFAULT_SUB_AREA && (p.subArea ?? "") !== subArea) return false;
           if (keyword && !p.title.toLowerCase().includes(keyword.toLowerCase())) return false;
           if (category === "plot" && (p.size < plotSize[0] || p.size > plotSize[1])) return false;
           return true;
         });
     return sortProperties(applyExtraFilters(base, extra), sortKey);
-  }, [allProperties, hasSearched, intent, category, area, keyword, plotSize, extra, sortKey]);
+  }, [allProperties, hasSearched, intent, category, area, subArea, keyword, plotSize, extra, sortKey]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,6 +170,19 @@ function Index() {
                   <SelectContent>{KARACHI_AREAS.map((a) => (<SelectItem key={a} value={a}>{a}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
+
+              {subAreaOptions.length > 0 && (
+                <div className="md:col-span-4">
+                  <Label className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">Block / phase</Label>
+                  <Select value={subArea} onValueChange={setSubArea}>
+                    <SelectTrigger className="h-12 w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DEFAULT_SUB_AREA}>{DEFAULT_SUB_AREA}</SelectItem>
+                      {subAreaOptions.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="md:col-span-4">
                 <Label className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">Property type</Label>
