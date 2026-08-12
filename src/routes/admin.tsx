@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity } from "lucide-react";
+import { LayoutDashboard, Users, List as ListIcon, Inbox, LogOut, Loader2, Check, X, Activity, Droplets, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,9 @@ import { PACKAGES } from "@/lib/properties";
 import { viewerLabel, type ListingViewRow } from "@/lib/views";
 import {
   adminLogin, adminFetchAll, adminUpdateRealtor, adminUpdateListing, adminSeedSahil, adminFetchViews,
+  adminFetchAreaReports, adminSetAreaReport,
 } from "@/lib/admin.functions";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — abaad.com" }, { name: "robots", content: "noindex" }] }),
@@ -24,7 +26,7 @@ const SESSION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 type Creds = { email: string; password: string };
 type Session = { token: string; expires: number; email: string; password: string };
-type Section = "overview" | "realtors" | "listings" | "requests" | "activity";
+type Section = "overview" | "realtors" | "listings" | "requests" | "activity" | "reports";
 
 
 function loadSession(): Session | null {
@@ -176,6 +178,7 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
     { v: "realtors", label: "Realtors", Icon: Users },
     { v: "listings", label: "Listings", Icon: ListIcon },
     { v: "activity", label: "Activity", Icon: Activity },
+    { v: "reports", label: "Area Reports", Icon: Droplets },
     { v: "requests", label: "Requests", Icon: Inbox, badge: pending.length },
   ];
 
@@ -240,6 +243,8 @@ function Dashboard({ creds, onLogout }: { creds: Creds; onLogout: () => void }) 
             <ListingsTable rows={listings} onToggle={toggleListing} />
           ) : section === "activity" ? (
             <ActivityLog creds={creds} realtors={realtors} listings={listings} />
+          ) : section === "reports" ? (
+            <AreaReportsPanel creds={creds} />
 
           ) : (
             <RealtorsTable rows={pending} onSetStatus={setStatus} onSetResponseTime={setResponseTime} prominent />
@@ -517,6 +522,128 @@ function ActivityLog({ creds, realtors, listings }: { creds: Creds; realtors: an
                     <Badge variant="outline" className="capitalize">{r.event_type}</Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleString("en-PK")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AreaReportsPanel({ creds }: { creds: Creds }) {
+  const fetchReports = useServerFn(adminFetchAreaReports);
+  const setReport = useServerFn(adminSetAreaReport);
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"pending" | "approved" | "all">("pending");
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetchReports({ data: creds });
+      setRows(res.reports as any[]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to load area reports");
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => { load(); }, []);
+
+  async function act(id: string, action: "approve" | "unapprove" | "delete") {
+    try {
+      await setReport({ data: { ...creds, id, action } });
+      setRows((rs) =>
+        action === "delete"
+          ? rs.filter((r) => r.id !== id)
+          : rs.map((r) => (r.id === id ? { ...r, is_approved: action === "approve" } : r)),
+      );
+      toast.success(action === "delete" ? "Report deleted" : action === "approve" ? "Report approved" : "Report unpublished");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Action failed");
+    }
+  }
+
+  const filtered = rows.filter((r) =>
+    tab === "all" ? true : tab === "pending" ? !r.is_approved : r.is_approved,
+  );
+  const pendingCount = rows.filter((r) => !r.is_approved).length;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-md border border-border bg-secondary p-1">
+          {(["pending", "approved", "all"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`rounded px-3 py-1.5 text-xs font-medium capitalize transition ${
+                tab === t ? "bg-card text-navy shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t}{t === "pending" && pendingCount ? ` (${pendingCount})` : ""}
+            </button>
+          ))}
+        </div>
+        <Button size="sm" variant="outline" className="ml-auto" onClick={load} disabled={loading}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />} Refresh
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin" /></div>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No {tab === "all" ? "" : tab} area reports.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Area</th>
+                <th className="px-4 py-3">Water</th>
+                <th className="px-4 py-3">Gas</th>
+                <th className="px-4 py-3 text-center">Security</th>
+                <th className="px-4 py-3">Notes</th>
+                <th className="px-4 py-3">Submitted</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map((r) => (
+                <tr key={r.id}>
+                  <td className="px-4 py-3 font-medium">
+                    {r.area}
+                    {r.sub_area ? <span className="block text-xs text-muted-foreground">{r.sub_area}</span> : null}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.water_timing ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.gas_loadshedding ?? "—"}</td>
+                  <td className="px-4 py-3 text-center tabular-nums">{r.security_rating}/5</td>
+                  <td className="px-4 py-3 max-w-[260px] text-muted-foreground">{r.notes ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString("en-PK")}</td>
+                  <td className="px-4 py-3 text-center">
+                    <Badge className={r.is_approved ? "bg-green text-green-foreground" : "bg-amber-500 text-white"}>
+                      {r.is_approved ? "Approved" : "Pending"}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      {!r.is_approved ? (
+                        <Button size="sm" className="bg-green text-green-foreground hover:bg-green/90" onClick={() => act(r.id, "approve")}>
+                          <Check className="h-3.5 w-3.5" /> Approve
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => act(r.id, "unapprove")}>
+                          <X className="h-3.5 w-3.5" /> Unpublish
+                        </Button>
+                      )}
+                      <Button size="sm" variant="outline" onClick={() => act(r.id, "delete")} aria-label="Delete report">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

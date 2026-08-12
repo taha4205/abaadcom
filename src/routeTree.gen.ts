@@ -14,12 +14,14 @@ import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RentRouteImport } from './routes/rent'
 import { Route as RealtorsRouteImport } from './routes/realtors'
+import { Route as PlotsRouteImport } from './routes/plots'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as MyListingsRouteImport } from './routes/my-listings'
 import { Route as MagazineRouteImport } from './routes/magazine'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as ConverterRouteImport } from './routes/converter'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -53,6 +55,11 @@ const RealtorsRoute = RealtorsRouteImport.update({
   path: '/realtors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlotsRoute = PlotsRouteImport.update({
+  id: '/plots',
+  path: '/plots',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PackagesRoute = PackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
@@ -81,6 +88,11 @@ const ConverterRoute = ConverterRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConstructionRoute = ConstructionRouteImport.update({
+  id: '/construction',
+  path: '/construction',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculatorRoute = CalculatorRouteImport.update({
@@ -124,12 +136,14 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/plots': typeof PlotsRoute
   '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -144,12 +158,14 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/plots': typeof PlotsRoute
   '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -165,12 +181,14 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/calculator': typeof CalculatorRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
   '/converter': typeof ConverterRoute
   '/list': typeof ListRoute
   '/magazine': typeof MagazineRouteWithChildren
   '/my-listings': typeof MyListingsRoute
   '/packages': typeof PackagesRoute
+  '/plots': typeof PlotsRoute
   '/realtors': typeof RealtorsRoute
   '/rent': typeof RentRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -187,12 +205,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/plots'
     | '/realtors'
     | '/rent'
     | '/sitemap.xml'
@@ -207,12 +227,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/plots'
     | '/realtors'
     | '/rent'
     | '/sitemap.xml'
@@ -227,12 +249,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/calculator'
+    | '/construction'
     | '/contact'
     | '/converter'
     | '/list'
     | '/magazine'
     | '/my-listings'
     | '/packages'
+    | '/plots'
     | '/realtors'
     | '/rent'
     | '/sitemap.xml'
@@ -248,12 +272,14 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   CalculatorRoute: typeof CalculatorRoute
+  ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
   ConverterRoute: typeof ConverterRoute
   ListRoute: typeof ListRoute
   MagazineRoute: typeof MagazineRouteWithChildren
   MyListingsRoute: typeof MyListingsRoute
   PackagesRoute: typeof PackagesRoute
+  PlotsRoute: typeof PlotsRoute
   RealtorsRoute: typeof RealtorsRoute
   RentRoute: typeof RentRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -300,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RealtorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plots': {
+      id: '/plots'
+      path: '/plots'
+      fullPath: '/plots'
+      preLoaderRoute: typeof PlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/packages': {
       id: '/packages'
       path: '/packages'
@@ -340,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/construction': {
+      id: '/construction'
+      path: '/construction'
+      fullPath: '/construction'
+      preLoaderRoute: typeof ConstructionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculator': {
@@ -411,12 +451,14 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   CalculatorRoute: CalculatorRoute,
+  ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
   ConverterRoute: ConverterRoute,
   ListRoute: ListRoute,
   MagazineRoute: MagazineRouteWithChildren,
   MyListingsRoute: MyListingsRoute,
   PackagesRoute: PackagesRoute,
+  PlotsRoute: PlotsRoute,
   RealtorsRoute: RealtorsRoute,
   RentRoute: RentRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -428,3 +470,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
