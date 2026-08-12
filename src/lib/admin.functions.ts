@@ -122,3 +122,40 @@ export const adminSeedSahil = createServerFn({ method: "POST" })
     if (linkErr) throw new Error(linkErr.message);
     return { ok: true, email: EMAIL };
   });
+
+export const adminFetchAreaReports = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => Creds.parse(d))
+  .handler(async ({ data }) => {
+    checkAuth(data.email, data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("area_reports")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return { reports: rows ?? [] };
+  });
+
+export const adminSetAreaReport = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    Creds.extend({
+      id: z.string(),
+      action: z.enum(["approve", "unapprove", "delete"]),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    checkAuth(data.email, data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.action === "delete") {
+      const { error } = await supabaseAdmin.from("area_reports").delete().eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    const { error } = await supabaseAdmin
+      .from("area_reports")
+      .update({ is_approved: data.action === "approve" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
