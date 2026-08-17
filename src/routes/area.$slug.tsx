@@ -110,7 +110,7 @@ function AreaGuidePage() {
             <p className="mt-3 text-sm text-muted-foreground">No live listings in this area right now.</p>
           ) : (
             <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {listings.slice(0, 9).map((p) => <PropertyCard key={String(p.id)} property={p} />)}
+              {listings.slice(0, 9).map((p) => <PropertyCard key={String(p.id)} p={p} />)}
             </div>
           )}
         </section>
