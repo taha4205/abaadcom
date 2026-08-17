@@ -699,10 +699,11 @@ function EditDialog({ listing, onClose, onSaved }: { listing: Listing; onClose: 
     if (!s.title.trim()) return toast.error("Title required");
     setBusy(true);
     const { error } = await supabase.from("listings").update({
-      title: s.title, area: s.area, intent: s.intent, category: s.category,
+      title: s.title, area: s.area, sub_area: s.subArea || null, intent: s.intent, category: s.category,
       beds: s.category === "plot" ? 0 : s.beds,
       baths: s.category === "plot" ? 0 : s.baths,
       size_sqyd: s.size, price_num: s.price, price_text: formatPKR(s.price, s.intent),
+      description: s.description || null,
       whatsapp_number: s.whatsapp || null,
       image_url: s.imageUrl || s.imageUrls[0] || null,
       image_urls: s.imageUrls,
