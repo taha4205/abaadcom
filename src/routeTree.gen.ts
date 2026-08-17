@@ -23,12 +23,14 @@ import { Route as ConverterRouteImport } from './routes/converter'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as AreasRouteImport } from './routes/areas'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RealtorIdRouteImport } from './routes/realtor.$id'
 import { Route as PropertySlugRouteImport } from './routes/property.$slug'
 import { Route as MagazineSlugRouteImport } from './routes/magazine.$slug'
+import { Route as AreaSlugRouteImport } from './routes/area.$slug'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -100,6 +102,11 @@ const CalculatorRoute = CalculatorRouteImport.update({
   path: '/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AreasRoute = AreasRouteImport.update({
+  id: '/areas',
+  path: '/areas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -130,11 +137,17 @@ const MagazineSlugRoute = MagazineSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => MagazineRoute,
 } as any)
+const AreaSlugRoute = AreaSlugRouteImport.update({
+  id: '/area/$slug',
+  path: '/area/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -149,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trends': typeof TrendsRoute
   '/wishlist': typeof WishlistRoute
+  '/area/$slug': typeof AreaSlugRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/realtor/$id': typeof RealtorIdRoute
@@ -157,6 +171,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -171,6 +186,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trends': typeof TrendsRoute
   '/wishlist': typeof WishlistRoute
+  '/area/$slug': typeof AreaSlugRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/realtor/$id': typeof RealtorIdRoute
@@ -180,6 +196,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -194,6 +211,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trends': typeof TrendsRoute
   '/wishlist': typeof WishlistRoute
+  '/area/$slug': typeof AreaSlugRoute
   '/magazine/$slug': typeof MagazineSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/realtor/$id': typeof RealtorIdRoute
@@ -204,6 +222,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -218,6 +237,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/trends'
     | '/wishlist'
+    | '/area/$slug'
     | '/magazine/$slug'
     | '/property/$slug'
     | '/realtor/$id'
@@ -226,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -240,6 +261,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/trends'
     | '/wishlist'
+    | '/area/$slug'
     | '/magazine/$slug'
     | '/property/$slug'
     | '/realtor/$id'
@@ -248,6 +270,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -262,6 +285,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/trends'
     | '/wishlist'
+    | '/area/$slug'
     | '/magazine/$slug'
     | '/property/$slug'
     | '/realtor/$id'
@@ -271,6 +295,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  AreasRoute: typeof AreasRoute
   CalculatorRoute: typeof CalculatorRoute
   ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
@@ -285,6 +310,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrendsRoute: typeof TrendsRoute
   WishlistRoute: typeof WishlistRoute
+  AreaSlugRoute: typeof AreaSlugRoute
   PropertySlugRoute: typeof PropertySlugRoute
   RealtorIdRoute: typeof RealtorIdRoute
 }
@@ -389,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/areas': {
+      id: '/areas'
+      path: '/areas'
+      fullPath: '/areas'
+      preLoaderRoute: typeof AreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -431,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MagazineSlugRouteImport
       parentRoute: typeof MagazineRoute
     }
+    '/area/$slug': {
+      id: '/area/$slug'
+      path: '/area/$slug'
+      fullPath: '/area/$slug'
+      preLoaderRoute: typeof AreaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -450,6 +490,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  AreasRoute: AreasRoute,
   CalculatorRoute: CalculatorRoute,
   ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
@@ -464,6 +505,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrendsRoute: TrendsRoute,
   WishlistRoute: WishlistRoute,
+  AreaSlugRoute: AreaSlugRoute,
   PropertySlugRoute: PropertySlugRoute,
   RealtorIdRoute: RealtorIdRoute,
 }
