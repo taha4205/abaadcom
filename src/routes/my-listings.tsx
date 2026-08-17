@@ -510,9 +510,10 @@ function ViewersPanel({
 
 
 type FormState = {
-  title: string; area: string; intent: Intent; category: Category;
+  title: string; area: string; subArea: string; intent: Intent; category: Category;
   beds: number; baths: number; size: number; price: number;
   whatsapp: string; imageUrl: string; imageUrls: string[];
+  description: string;
 };
 
 function PhotoUploader({ urls, onChange }: { urls: string[]; onChange: (u: string[]) => void }) {
