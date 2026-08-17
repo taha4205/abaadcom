@@ -47,7 +47,8 @@ function AreasPage() {
             return (
               <Link
                 key={g.area}
-                to={`/area/${areaGuideSlug(g.area)}`}
+                to="/area/$slug"
+                params={{ slug: areaGuideSlug(g.area) }}
                 className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-navy/40"
               >
                 <div className="flex items-center justify-between">
