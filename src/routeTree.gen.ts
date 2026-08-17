@@ -23,6 +23,7 @@ import { Route as ConverterRouteImport } from './routes/converter'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as AreasRouteImport } from './routes/areas'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -100,6 +101,11 @@ const CalculatorRoute = CalculatorRouteImport.update({
   path: '/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AreasRoute = AreasRouteImport.update({
+  id: '/areas',
+  path: '/areas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/areas': typeof AreasRoute
   '/calculator': typeof CalculatorRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/areas'
     | '/calculator'
     | '/construction'
     | '/contact'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  AreasRoute: typeof AreasRoute
   CalculatorRoute: typeof CalculatorRoute
   ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
@@ -389,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/areas': {
+      id: '/areas'
+      path: '/areas'
+      fullPath: '/areas'
+      preLoaderRoute: typeof AreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  AreasRoute: AreasRoute,
   CalculatorRoute: CalculatorRoute,
   ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
