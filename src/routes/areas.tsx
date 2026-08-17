@@ -43,12 +43,11 @@ function AreasPage() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AREA_GUIDES.map((g) => {
             const listings = all.filter((p) => p.area === g.area);
-            const prices = listings.filter((p) => p.price > 0).map((p) => p.price);
+            const prices = listings.map((p) => p.priceNum).filter((n) => n > 0);
             return (
               <Link
                 key={g.area}
-                to="/area/$slug"
-                params={{ slug: areaGuideSlug(g.area) }}
+                to={`/area/${areaGuideSlug(g.area)}`}
                 className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-navy/40"
               >
                 <div className="flex items-center justify-between">
@@ -58,7 +57,7 @@ function AreasPage() {
                 <Badge variant="outline" className="mt-2 text-[11px]"><MapPin className="mr-1 h-3 w-3" />{g.vibe}</Badge>
                 <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{g.blurb}</p>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  {listings.length > 0
+                  {prices.length > 0
                     ? `${listings.length} listing${listings.length === 1 ? "" : "s"} · from ${fmtPKRShort(Math.min(...prices))}`
                     : "No live listings yet"}
                 </p>
